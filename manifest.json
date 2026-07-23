@@ -1,7 +1,9 @@
 {
+  "manifest_version": 1,
   "name": "Aim Recoil System",
   "version": "1.0.0",
-  "manifest_version": 1,
-  "description": "My Aim and Recoil System",
-  "entrypoint": "index.html"
+  "author": "F1A-M0ND",
+  "description": "Aim & Recoil System",
+  "icon": "icon.svg",
+  "entrypoint": "https://f1a-m0nd.github.io/Aim-Recoil-Extension/"
 }
