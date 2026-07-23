@@ -1,0 +1,7 @@
+{
+  "name": "Aim Recoil System",
+  "version": "1.0.0",
+  "manifest_version": 1,
+  "description": "My Aim and Recoil System",
+  "entrypoint": "index.html"
+}
