@@ -1,8 +1,10 @@
 import './style.css'
-import { isObrAvailable } from './obr/client.js'
+import { isObrAvailable, OBR } from './obr/client.js'
 import { createApp } from './ui/app.js'
 
 const root = document.querySelector('#app')
-const isConnected = isObrAvailable()
+const start = () => createApp(root, { isConnected: isObrAvailable() })
 
-createApp(root, { isConnected })
+// The board API is only safe to call after Owlbear has completed its handshake.
+if (isObrAvailable()) OBR.onReady(start)
+else start()
