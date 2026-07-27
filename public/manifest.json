@@ -1,12 +1,13 @@
 {
-  "manifest_version": 1,
   "name": "Aim System",
   "version": "0.1.0",
+  "manifest_version": 1,
   "description": "Aim and rapid-fire planning tools for Owlbear Rodeo.",
-  "icon": "icon.svg",
   "action": {
     "title": "Aim System",
-    "icon": "icon.svg",
-    "popover": "index.html"
+    "icon": "/icon.svg",
+    "popover": "/",
+    "width": 420,
+    "height": 640
   }
 }
