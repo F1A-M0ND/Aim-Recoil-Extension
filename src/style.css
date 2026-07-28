@@ -2,7 +2,7 @@
 html,
 body,
 #app {
-    transform: scale(1);
+    transform: scale(0.95);
     transform-origin: top left;
 }
 .app-shell {
