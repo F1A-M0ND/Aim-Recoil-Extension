@@ -5,8 +5,8 @@
   "description": "Aim and rapid-fire planning tools for Owlbear Rodeo.",
   "action": {
     "title": "Aim System",
-    "icon": "https://f1a-m0nd.github.io/Aim-Recoil-Extension/icon.svg",
-    "popover": "https://f1a-m0nd.github.io/Aim-Recoil-Extension/index.html",
+    "icon": "/icon.svg",
+    "popover": "/",
     "width": 420,
     "height": 640
   }
