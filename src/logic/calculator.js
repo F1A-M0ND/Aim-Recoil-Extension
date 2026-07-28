@@ -23,6 +23,18 @@ function applyBuff(value, amount) {
   return value
 }
 
+function applyAccuracy(value, buff, debuff, mastery, CRc) {
+  // Accuracy Buff + Weapon Mastery = ลู่เข้าหา 6.5
+  value = applyBuff(value, buff)
+  value = applyBuff(value, mastery)
+
+  // Accuracy Debuff + Cumulative Recoil = ลู่ออกจาก 6.5
+  value = applyDebuff(value, debuff)
+  value = applyDebuff(value, CRc)
+
+  return value
+}
+
 const integer = (value, fallback = 0) => {
   const parsed = Number.parseInt(value, 10)
   return Number.isFinite(parsed) ? Math.max(0, parsed) : fallback
@@ -35,27 +47,97 @@ const decimal = (value, fallback = 0) => {
 
 export function getShotCount(input) {
   if (input.mode === 'time') {
-    const rpm = Math.max(1, Number(input.rpm) || 600)
+    const rpm = Number(input.rpm) || 0
     const seconds = Math.max(0, Number(input.duration) || 0)
+
+    // RPM = 0 : Fire once only
+    if (rpm === 0) {
+      return 1
+    }
+
     return Math.min(120, Math.max(1, Math.floor(seconds * rpm / 60)))
   }
+
   return Math.min(120, Math.max(1, integer(input.rounds, 1)))
 }
 
+export function calculateRecoveryRecoil(BPR) {
+  return Math.max(1 - (BPR / 60), 0)
+}
+
+export function applyCumulativeRecoil(state, input) {
+  const gunRecoil = Number(input.recoil) || 0
+  const str = Math.floor((Number(input.str) || 0) / 2)
+  const weaponMastery = Number(input.mastery) || 0
+  const bpr = Number(input.rpm) || 0
+
+  const RRc = calculateRecoveryRecoil(bpr)
+
+  const recoilGain = Math.max(
+      gunRecoil - str - weaponMastery - RRc,
+      0
+  )
+
+  state.CRc += recoilGain
+
+  return {
+    CRc: state.CRc,
+    recoilGain,
+    RRc
+  }
+}
+
 /** Roll one d12 for each axis, applying debuff before buff as game rules require. */
-export function fireShot(input, random = Math.random) {
+export function fireShot(input, state = { CRc: 0 }, random = Math.random) {
   const debuff = decimal(input.debuff)
   const buff = decimal(input.buff)
+  const mastery = decimal(input.mastery)
+
   const rolledX = Math.floor(random() * AIM_SIZE) + 1
   const rolledY = Math.floor(random() * AIM_SIZE) + 1
-  const afterDebuffX = applyDebuff(rolledX, debuff)
-  const afterDebuffY = applyDebuff(rolledY, debuff)
-  const x = applyBuff(afterDebuffX, buff)
-  const y = applyBuff(afterDebuffY, buff)
-  return { rolledX, rolledY, x, y, result: getAimResult(x, y), debuff, buff }
+
+  const x = applyAccuracy(
+      rolledX,
+      buff,
+      debuff,
+      mastery,
+      state.CRc
+  )
+
+  const y = applyAccuracy(
+      rolledY,
+      buff,
+      debuff,
+      mastery,
+      state.CRc
+  )
+
+  return {
+    rolledX,
+    rolledY,
+    x,
+    y,
+    CRc: state.CRc,
+    result: getAimResult(x, y)
+  }
 }
 
 export function fireSeries(input, random = Math.random) {
   const count = getShotCount(input)
-  return Array.from({ length: count }, (_, index) => ({ number: index + 1, ...fireShot(input, random) }))
+
+  const state = {
+    CRc: 0
+  }
+
+  return Array.from({ length: count }, (_, index) => {
+
+    const shot = fireShot(input, state, random)
+
+    applyCumulativeRecoil(state, input)
+
+    return {
+      number: index + 1,
+      ...shot
+    }
+  })
 }
