@@ -71,7 +71,7 @@ button { width:100%; padding:9px 12px; border:0; border-radius:6px; color:#07121
 .legend b { padding:0 3px; border-radius:3px; }.legend .perfect { background:#fff896; color:#544f17; }
 .legend .good { background:#f9d36b; color:#3e3516; }.legend .bad { background:#f89d59; color:#452414; }
 .legend .miss { background:#f1635c; color:#ffe0dd; }
-.fire-result { display:grid; gap:4px; max-height:130px; overflow:auto; padding:8px; border:1px solid #2a3b50; border-radius:6px; color:#cbd8e8; background:#0f1823; font-size:.73rem; }
+.fire-result { display:grid; gap:4px; height:130px; max-height:130px; overflow:auto; padding:8px; border:1px solid #2a3b50; border-radius:6px; color:#cbd8e8; background:#0f1823; font-size:.73rem; }
 .shot-output { display:block; margin:0; padding:4px 5px; border:1px solid transparent; border-radius:4px; color:#cbd8e8; background:transparent; text-align:left; font-size:inherit; font-weight:400; }
 .shot-output:hover,
 .shot-output:focus,
