@@ -57,7 +57,7 @@ export function createApp(root, { isConnected }) {
 <label>
   Strength
   <input name="Strength" type="number" min="0" step="1" value="0">
-  <small>weapon recoil value</small>
+  <small>strength modify point</small>
 </label>
 </div>
         <button type="submit">Fire</button>
