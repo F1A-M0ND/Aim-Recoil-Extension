@@ -49,15 +49,44 @@ export function createApp(root, { isConnected }) {
           <label>Accuracy Buff <input name="buff" type="number" min="0" step="0.01" value="0"><small>then converges inward</small></label>
           <label data-mode="count">Rounds <input name="rounds" type="number" min="1" max="120" value="1"><small>shots to fire</small></label>
           <label data-mode="time" hidden>Time Trigger <input name="duration" type="number" min="0.1" max="60" step="0.1" value="1"><small>seconds held</small></label>
-        </div>
+          <label class="full-width">
+  Recoil Weapon
+  <input name="recoil" type="number" min="0" step="0.01" value="0">
+  <small>weapon recoil value</small>
+</label>
+</div>
         <button type="submit">Fire</button>
       </form>
-      <section class="result-card">
-        <div class="result-heading"><h2>Aim Table</h2><span id="shot-count">Ready to fire</span></div>
+<section class="aim-panel">
         <div class="aim-table" id="aim-table" role="img" aria-label="12 by 12 Aim Table with shot markers"></div>
-        <p class="legend"><b class="perfect">P</b> Perfect <b class="good">G</b> Good <b class="bad">B</b> Bad <b class="miss">M</b> Miss</p>
-        <section class="fire-result" id="fire-result" aria-live="polite">Press Fire to roll d12 for X and Y.</section>
-        <div class="board-actions"><button class="secondary" id="project" type="button" disabled>Project to board</button><button class="ghost" id="clear" type="button" ${isConnected ? '' : 'disabled'}>Clear markers</button></div>
+      </section>
+
+      <section class="result-card">
+        <div class="result-heading">
+          <h2>Aim Result</h2>
+          <span id="shot-count">Ready to fire</span>
+        </div>
+
+        <p class="legend">
+          <b class="perfect">P</b> Perfect
+          <b class="good">G</b> Good
+          <b class="bad">B</b> Bad
+          <b class="miss">M</b> Miss
+        </p>
+
+        <section class="fire-result" id="fire-result" aria-live="polite">
+          Press Fire to roll d12 for X and Y.
+        </section>
+
+        <div class="board-actions">
+          <button class="secondary" id="project" type="button" disabled>
+            Project to board
+          </button>
+          <button class="ghost" id="clear" type="button" ${isConnected ? '' : 'disabled'}>
+            Clear markers
+          </button>
+        </div>
+
         <p class="action-message" id="action-message"></p>
       </section>
     </main>`
