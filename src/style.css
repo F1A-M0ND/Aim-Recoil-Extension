@@ -2,7 +2,7 @@
 html,
 body,
 #app {
-    transform: scale(0.9);
+    transform: scale(0.7);
     transform-origin: top left;
     width: 142.86%;
     height: 142.86%;
