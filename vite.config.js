@@ -1,8 +1,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-    base: "./",
-
+    base: "/Aim-Recoil-Extension/",
     server: {
         cors: {
             origin: "https://www.owlbear.rodeo",
