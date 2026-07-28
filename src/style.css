@@ -4,7 +4,7 @@ body,
 #app {
     width: 119%;
     height: 119%;
-    transform: scale(0.84);
+    transform: scale(0.85);
     transform-origin: top left;
     overflow:hidden;
 }
