@@ -4,6 +4,8 @@ body,
 #app {
     transform: scale(0.9);
     transform-origin: top left;
+    width: 142.86%;
+    height: 142.86%;
 }
 .app-shell {
     grid-column:1 / -1;
