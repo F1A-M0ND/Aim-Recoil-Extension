@@ -49,9 +49,14 @@ export function createApp(root, { isConnected }) {
           <label>Accuracy Buff <input name="buff" type="number" min="0" step="0.01" value="0"><small>then converges inward</small></label>
           <label data-mode="count">Rounds <input name="rounds" type="number" min="1" max="120" value="1"><small>shots to fire</small></label>
           <label data-mode="time" hidden>Time Trigger <input name="duration" type="number" min="0.1" max="60" step="0.1" value="1"><small>seconds held</small></label>
-          <label class="full-width">
+          <label>
   Recoil Weapon
   <input name="recoil" type="number" min="0" step="0.01" value="0">
+  <small>weapon recoil value</small>
+</label>
+<label>
+  Strength
+  <input name="Strength" type="number" min="0" step="1" value="0">
   <small>weapon recoil value</small>
 </label>
 </div>
