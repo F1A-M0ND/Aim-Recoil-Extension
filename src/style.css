@@ -1,4 +1,10 @@
-:root { color:#edf4ff; background:#0f1722; font-family:Inter,ui-sans-serif,system-ui,sans-serif; } * { box-sizing:border-box; } html, body, #app { width:100%; min-height:100%;margin:0; } body { overflow:auto; } button,input { font:inherit; }
+:root { color:#edf4ff; background:#0f1722; font-family:Inter,ui-sans-serif,system-ui,sans-serif; } * { box-sizing:border-box; }
+html,
+body,
+#app {
+    transform: scale(0.9);
+    transform-origin: top left;
+}
 .app-shell {
     grid-column:1 / -1;
     grid-row:1;
