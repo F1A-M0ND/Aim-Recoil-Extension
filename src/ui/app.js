@@ -44,7 +44,7 @@ export function createApp(root, { isConnected }) {
       <form class="control-card" id="combat-form">
         <div class="mode-row"><label><input type="radio" name="mode" value="count" checked> Bullet Count</label><label><input type="radio" name="mode" value="time"> Timebase</label></div>
         <div class="field-grid">
-          <label>Fire rate <input name="rpm" type="number" min="1" max="2400" value="600"><small>RPM (Timebase only)</small></label>
+          <label>Fire rate <input name="rpm" type="number" min="0" max="2400" value="600"><small>RPM (Timebase only)</small></label>
           <label>Accuracy Debuff <input name="debuff" type="number" min="0" step="0.01" value="0"><small>moves outward first</small></label>
           <label>Accuracy Buff <input name="buff" type="number" min="0" step="0.01" value="0"><small>then converges inward</small></label>
           <label data-mode="count">Rounds <input name="rounds" type="number" min="1" max="120" value="1"><small>shots to fire</small></label>
