@@ -2,10 +2,8 @@
 html,
 body,
 #app {
-    transform: scale(0.8);
+    transform: scale(0.7);
     transform-origin: top left;
-    width: 100%;
-    height: 100%;
 }
 .app-shell {
     grid-column:1 / -1;
