@@ -61,20 +61,22 @@ export function getShotCount(input) {
   return Math.min(120, Math.max(1, integer(input.rounds, 1)))
 }
 
-export function calculateRecoveryRecoil(BPR) {
-  return Math.max(1 - (BPR / 60), 0)
-}
-
 export function applyCumulativeRecoil(state, input) {
+
   const gunRecoil = Number(input.recoil) || 0
   const str = Math.floor((Number(input.str) || 0) / 2)
-  const weaponMastery = Number(input.mastery) || 0
-  const bpr = Number(input.rpm) || 0
+  const gunMastery = Number(input.mastery) || 0
 
-  const RRc = calculateRecoveryRecoil(bpr)
+  // BPR = RPM ที่ผู้เล่นใส่
+  const BPR = Number(input.rpm) || 0
+
+  const RRc = Math.max(
+      1 - (BPR / 60),
+      0
+  )
 
   const recoilGain = Math.max(
-      gunRecoil - str - weaponMastery - RRc,
+      gunRecoil - str - gunMastery - RRc,
       0
   )
 
@@ -123,21 +125,46 @@ export function fireShot(input, state = { CRc: 0 }, random = Math.random) {
 }
 
 export function fireSeries(input, random = Math.random) {
+
   const count = getShotCount(input)
 
   const state = {
-    CRc: 0
+    CRc: 0,
+    lastShotTime: 0
   }
 
-  return Array.from({ length: count }, (_, index) => {
+  const BPR = Number(input.rpm) || 0
 
-    const shot = fireShot(input, state, random)
+  const interval = BPR > 0
+      ? 60000 / BPR
+      : Infinity
 
-    applyCumulativeRecoil(state, input)
+
+  return Array.from({length: count}, (_, index)=>{
+
+    // ถ้าห่างเกิน 2 วิ ให้คืนศูนย์
+    if(index > 0 && interval >= 2000){
+      state.CRc = 0
+    }
+
+
+    const shot = fireShot(
+        input,
+        state,
+        random
+    )
+
+
+    applyCumulativeRecoil(
+        state,
+        input
+    )
+
 
     return {
-      number: index + 1,
+      number:index + 1,
       ...shot
     }
+
   })
 }
