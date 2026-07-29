@@ -1,9 +1,27 @@
 import { AIM_SIZE, fireSeries, getShotCount } from '../logic/calculator.js'
-import { clearAimOverlays, projectAimOverlay } from '../obr/board.js'
+import { createImpactLayer, showImpact } from '../effect/impact.js'
+
+const DEFAULT_SOUNDS = {
+  Bullet: './assets/sounds/bullet.mp3',
+  Handgun: './assets/sounds/handgun.mp3',
+  Shotgun: './assets/sounds/shotgun.wav',
+  SniperRifle: './assets/sounds/sniper-rifle.mp3',
+  AutoRifle: './assets/sounds/auto-rifle.wav',
+  GrenadeLauncher: './assets/sounds/grenade-launcher.mp3',
+  RocketLauncher: './assets/sounds/rocket-launcher.mp3'
+}
 
 const CELL_LABEL = { PERFECT: 'P', GOOD: 'G', BAD: 'B', MISS: 'M' }
 const cssResult = (result) => result.toLowerCase().replace(' ', '-')
 const fmt = (value) => Number(value).toFixed(2)
+
+function fireDelay(rpm){
+  if(Number(rpm)<=0) return Infinity
+
+  return 60000 / Number(rpm)
+}
+
+
 
 function cellType(x, y) {
   if ((y === 6 || y === 7) && (x === 6 || x === 7)) return 'PERFECT'
@@ -40,7 +58,30 @@ export function createApp(root, { isConnected }) {
   root.innerHTML = `
     <main class="app-shell">
       <header><p class="eyebrow">Owlbear Rodeo · Combat Planner</p><h1>Aim System</h1></header>
-      <section class="status-card"><span class="status-dot ${isConnected ? 'is-connected' : ''}"></span><p>${isConnected ? 'Connected to Owlbear Rodeo' : 'Preview mode — open inside Owlbear Rodeo to project'}</p></section>
+<section class="control-card sound-card">
+  <label>
+    <span>Fire Sound</span>
+
+    <select id="fire-sound-select">
+      <option value="Auto" selected>Auto</option>
+      <option value="Bullet">Bullet</option>
+      <option value="Handgun">Handgun</option>
+      <option value="Shotgun">Shotgun</option>
+      <option value="SniperRifle">SniperRifle</option>
+      <option value="AutoRifle">AutoRifle</option>
+      <option value="GrenadeLauncher">GrenadeLauncher</option>
+      <option value="RocketLauncher">RocketLauncher</option>
+      <option value="Upload">Upload Sound...</option>
+    </select>
+
+    <input 
+      id="fire-sound-upload"
+      type="file"
+      accept="audio/*"
+      hidden
+    >
+  </label>
+</section>
       <form class="control-card" id="combat-form">
         <div class="mode-row"><label><input type="radio" name="mode" value="count" checked> Bullet Count</label><label><input type="radio" name="mode" value="time"> Timebase</label></div>
         <div class="field-grid">
@@ -87,27 +128,127 @@ Strength
         <section class="fire-result" id="fire-result" aria-live="polite">
           Press Fire to roll d12 for X and Y.
         </section>
-
-        <div class="board-actions">
-          <button class="secondary" id="project" type="button" disabled>
-            Project to board
-          </button>
-          <button class="ghost" id="clear" type="button" ${isConnected ? '' : 'disabled'}>
-            Clear markers
-          </button>
-        </div>
-
         <p class="action-message" id="action-message"></p>
       </section>
     </main>`
 
   const form = root.querySelector('#combat-form')
   const table = root.querySelector('#aim-table')
+  createImpactLayer(table)
   const resultPanel = root.querySelector('#fire-result')
   const shotCount = root.querySelector('#shot-count')
-  const project = root.querySelector('#project')
   const message = root.querySelector('#action-message')
+  const fireSoundSelect = root.querySelector('#fire-sound-select')
+  const fireSoundUpload = root.querySelector('#fire-sound-upload')
+  let fireSound = null
+
+  fireSoundSelect.addEventListener('change',(event)=>{
+
+    const value = event.target.value
+
+    if(value === 'Upload'){
+      fireSoundUpload.click()
+      return
+    }
+
+    if(value === 'Auto'){
+
+      fireSound = new Audio(getAutoSound())
+      fireSound.preload = "auto"
+      fireSound.volume = 1
+
+      return
+    }
+
+    fireSound = new Audio(DEFAULT_SOUNDS[value])
+
+  })
+
+  fireSoundUpload.addEventListener('change',(event)=>{
+
+    const file = event.target.files[0]
+
+    if(file){
+
+      fireSound = new Audio(
+          URL.createObjectURL(file)
+      )
+
+      fireSoundSelect.options[
+          fireSoundSelect.selectedIndex
+          ].text = `Upload: ${file.name}`
+
+    }
+
+  })
+
+  function playFireSound(){
+
+    if(!fireSound)
+      return
+
+    const sound = fireSound.cloneNode()
+
+    sound.volume = fireSound.volume
+    sound.currentTime = 0
+    sound.preload = "auto"
+
+    sound.play()
+        .catch(error=>{
+          console.log("sound error:", error)
+        })
+
+    sound.onended = () => {
+      sound.remove()
+    }
+
+  }
+
+  function getAutoSound() {
+
+    const rpm = Number(values().rpm)
+    const shotCount = getShotCount(values())
+
+    // ยิงแค่ 1 นัด = Sniper เสมอ
+    if (shotCount === 1) {
+      return DEFAULT_SOUNDS.SniperRifle
+    }
+
+
+    // ไม่มี Fire Rate
+    if (rpm === 0) {
+      return DEFAULT_SOUNDS.Shotgun
+    }
+
+
+    // จำแนกตาม Fire Rate
+
+    if (rpm >= 1 && rpm <= 19) {
+      return DEFAULT_SOUNDS.RocketLauncher
+    }
+
+
+    if (rpm >= 20 && rpm <= 249) {
+      return DEFAULT_SOUNDS.GrenadeLauncher
+    }
+
+
+    if (rpm >= 250 && rpm <= 599) {
+      return DEFAULT_SOUNDS.Handgun
+    }
+
+
+    if (rpm >= 600) {
+      return DEFAULT_SOUNDS.AutoRifle
+    }
+
+
+    return DEFAULT_SOUNDS.Bullet
+  }
+
   let firedShots = []
+  let visibleShots = []
+  let displayedShots = []
   const values = () => Object.fromEntries(new FormData(form))
   const setMode = () => {
     const timeMode = values().mode === 'time'
@@ -115,12 +256,18 @@ Strength
     form.querySelector('[data-mode="count"]').hidden = timeMode
     shotCount.textContent = `Will fire ${getShotCount(values())} shot${getShotCount(values()) === 1 ? '' : 's'}`
   }
-  const renderSummary = () => {
-    if (!firedShots.length) {
+  const renderSummary = (shots = firedShots) => {
+    if (!shots.length) {
       resultPanel.textContent = 'Press Fire to roll d12 for X and Y.'
       return
     }
-    resultPanel.innerHTML = firedShots.map(({ number, rolledX, rolledY, x, y, result }) => `<button class="shot-output" data-shot="${number}" type="button"><b>#${number}</b> d12 (${rolledX}, ${rolledY}) → (${fmt(x)}, ${fmt(y)}) <strong class="${cssResult(result)}">${result}</strong></button>`).join('')
+
+    resultPanel.innerHTML = shots.map(({ number, rolledX, rolledY, x, y, result }) =>
+        `<button class="shot-output" data-shot="${number}" type="button">
+      <b>#${number}</b> d12 (${rolledX}, ${rolledY}) → (${fmt(x)}, ${fmt(y)})
+      <strong class="${cssResult(result)}">${result}</strong>
+    </button>`
+    ).join('')
   }
   const focusShot = (number) => {
     const shot = firedShots.find((item) => item.number === number)
@@ -135,11 +282,18 @@ Strength
     resultPanel.querySelectorAll('.shot-output').forEach((row) => row.classList.remove('is-focused'))
   }
   const renderTable = () => {
-    table.innerHTML = tableMarkup(firedShots)
-    table.querySelectorAll('.shot-marker').forEach((marker) => {
+    const oldImpactLayer = table.querySelector('.impact-layer')
+
+    table.innerHTML = tableMarkup(visibleShots)
+
+    if(oldImpactLayer){
+      table.appendChild(oldImpactLayer)
+    }
+
+    table.querySelectorAll('.shot-marker').forEach((marker)=>{
       const number = Number(marker.dataset.shot)
-      marker.addEventListener('mouseenter', () => focusShot(number))
-      marker.addEventListener('focus', () => focusShot(number))
+      marker.addEventListener('mouseenter',()=>focusShot(number))
+      marker.addEventListener('focus',()=>focusShot(number))
     })
   }
   table.addEventListener('mouseleave', clearFocus)
@@ -154,21 +308,96 @@ Strength
   resultPanel.addEventListener('mouseleave', clearFocus)
   form.addEventListener('change', setMode)
   form.addEventListener('input', setMode)
-  form.addEventListener('submit', (event) => {
+  let isFiring = false
+
+  form.addEventListener('submit', async (event)=>{
     event.preventDefault()
-    firedShots = fireSeries(values())
+
+    if(isFiring) return
+
+    isFiring = true
+
+    const fireButton = form.querySelector('button[type="submit"]')
+    fireButton.disabled = true
+
+    // เคลียร์กระสุนเก่า
+    firedShots = []
+    visibleShots = []
+    displayedShots = []
     renderTable()
+
+    // สุ่มกระสุนชุดใหม่
+    firedShots = fireSeries(values())
+
+    table.classList.add('is-firing')
+// รอเตรียมยิง 1 วิ
+    await new Promise(r => setTimeout(r, 1000))
+
+    const rpm = Number(values().rpm)
+
+    if(rpm <= 0){
+
+      // ยิงพร้อมกันทุกนัด
+      visibleShots = [...firedShots]
+      displayedShots = [...firedShots]
+
+      renderTable()
+      renderSummary(displayedShots)
+      if(fireSoundSelect.value === "Auto"){
+        fireSound = new Audio(getAutoSound())
+        fireSound.volume = 1
+      }
+      playFireSound()
+
+      for(const shot of firedShots){
+        showImpact(
+            shot.x,
+            shot.y
+        )
+      }
+
+    }else{
+
+      // ยิงทีละนัดตาม FireRate
+      const delayTime = fireDelay(rpm)
+
+      for(const shot of firedShots){
+
+        visibleShots.push(shot)
+        displayedShots.push(shot)
+
+        renderTable()
+        renderSummary(displayedShots)
+
+        if(fireSoundSelect.value === "Auto"){
+          fireSound = new Audio(getAutoSound())
+          fireSound.volume = 1
+        }
+
+        playFireSound()
+        showImpact(
+            shot.x,
+            shot.y
+        )
+
+        await new Promise(r =>
+            setTimeout(r, delayTime)
+        )
+      }
+    }
+    await new Promise(r=>setTimeout(r,1000))
+    table.style.transition="filter 1s ease"
+    table.classList.remove('is-firing')
+    await new Promise(r=>setTimeout(r,500))
+    table.style.transition=""
+
     const summary = firedShots.reduce((counts, { result }) => ({ ...counts, [result]: (counts[result] || 0) + 1 }), {})
     renderSummary()
     shotCount.textContent = `${firedShots.length} shot${firedShots.length === 1 ? '' : 's'} fired`
     message.textContent = Object.entries(summary).map(([name, count]) => `${count} ${name}`).join(' · ')
-    project.disabled = !isConnected
-  })
-  project.addEventListener('click', async () => {
-    try { message.textContent = `${await projectAimOverlay(firedShots)} valid shot marker(s) added to the board.` } catch (error) { message.textContent = error.message }
-  })
-  root.querySelector('#clear').addEventListener('click', async () => {
-    try { message.textContent = `${await clearAimOverlays()} aim marker(s) removed.` } catch (error) { message.textContent = error.message }
+
+    isFiring = false
+    fireButton.disabled = false
   })
   renderTable()
   setMode()

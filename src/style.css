@@ -66,7 +66,23 @@ button { width:100%; padding:9px 12px; border:0; border-radius:6px; color:#07121
 .axis-label { position:absolute; color:#aebfd2; font-size:.6rem; font-weight:800; letter-spacing:.08em; pointer-events:none; }
 .axis-x { right:2px; bottom:-16px; }
 .axis-y { left:-2px; top:2px; writing-mode:vertical-rl; transform:rotate(180deg); }
-.marker-layer { position:absolute; inset:0; pointer-events:none; }
+.marker-layer {
+    position:absolute;
+    inset:0;
+    z-index:2;
+}
+
+.impact-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.impact-circle {
+    pointer-events:none;
+}
 .shot-marker { position:absolute; z-index:2; display:grid; place-items:center; width:18px; height:18px; margin:0; padding:0; border:2px solid var(--marker-colour); border-radius:50%; color:#fff; background:var(--marker-colour); box-shadow:0 0 0 2px #ffffff88; font-size:8px; font-weight:900; pointer-events:auto; transform:translate(calc(-50% + var(--stack-offset)),calc(-50% - var(--stack-offset))); transition:transform .16s ease,box-shadow .16s ease,opacity .16s ease; }
 .aim-table.is-focused .shot-marker:not(.is-focused) { opacity:.3; }
 .shot-marker.is-focused { z-index:4; transform:translate(calc(-50% + var(--stack-offset)),calc(-50% - var(--stack-offset))) scale(1.45); box-shadow:0 0 0 3px #fff,0 0 12px var(--marker-colour); }
@@ -139,4 +155,35 @@ button { width:100%; padding:9px 12px; border:0; border-radius:6px; color:#07121
 
 .full-width input {
     width:305px
+}
+
+.aim-table.is-firing .aim-grid {
+    filter: brightness(.55);
+}
+
+.aim-table.is-firing .shot-marker {
+    opacity: 1;
+    box-shadow:
+            0 0 10px currentColor,
+            0 0 20px currentColor;
+}
+.sound-card {
+    grid-column:1;
+    grid-row:2;
+    padding:13px;
+}
+
+.sound-card label {
+    display:grid;
+    gap:6px;
+    color:#d9e5f4;
+    font-size:.78rem;
+}
+
+.sound-card select {
+    padding:7px;
+    border:1px solid #40546b;
+    border-radius:6px;
+    color:#edf4ff;
+    background:#0f1823;
 }
