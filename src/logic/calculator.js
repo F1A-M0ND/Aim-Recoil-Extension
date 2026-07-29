@@ -71,7 +71,7 @@ export function applyCumulativeRecoil(state, input) {
   const BPR = Number(input.rpm) || 0
 
   const RRc = Math.max(
-      1 - (BPR / 60),
+      1 - (BPR / 600),
       0
   )
 
