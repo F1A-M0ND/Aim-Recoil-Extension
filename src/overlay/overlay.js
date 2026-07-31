@@ -135,6 +135,7 @@ export async function createApp(root) {
 
     try {
         await onFire(async ({ shots, rpm }) => {
+            console.log("Overlay received", shots, rpm);
             overlay.classList.remove("hidden")
             globalShots = []
             visibleShots = []
@@ -152,6 +153,6 @@ export async function createApp(root) {
     } catch (err) {
         console.error("onFire init failed:", err)
     }
-
     renderTable()
+    console.log("Overlay app started");
 }
