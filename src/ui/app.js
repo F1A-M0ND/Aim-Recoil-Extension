@@ -1,6 +1,6 @@
 import { AIM_SIZE, fireSeries, getShotCount } from '../logic/calculator.js'
 import { createImpactLayer, showImpact } from '../effect/impact.js'
-import { sendFire, onFire } from "../obr/sync.js"
+import { sendFire } from "../obr/sync.js"
 
 const DEFAULT_SOUNDS = {
   Bullet: './assets/sounds/bullet.mp3',
@@ -413,23 +413,6 @@ Strength
     }
   }
 
-  try {
-    onFire(async ({ shots, rpm }) => {
-      globalShots = []
-      visibleShots = []
-      firedShots = shots
-
-      table.classList.add("is-firing")
-
-      await playFireAnimation(shots, rpm, true)
-
-      await new Promise(r => setTimeout(r, 1000))
-
-      table.classList.remove("is-firing")
-    })
-  } catch (err) {
-    console.error("onFire init failed:", err)
-  }
 
   form.addEventListener('submit', async (event) => {
 

@@ -9,6 +9,11 @@ body,
     overflow:hidden;
 }
 .app-shell {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    background: rgba(24,24,28,.35);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:16px;
     grid-column:1 / -1;
     grid-row:1;
     display:grid;
@@ -48,9 +53,9 @@ form > button {
 .result-heading span { color:#9cb3cb; font-size:.72rem; }
 .aim-table {
     position:relative;
-    width:100%;
+    width:auto;
     aspect-ratio:1 / 1;
-    height:auto;
+    height:100%;
     overflow:hidden;
     border:1px solid #354b63;
     border-radius:7px;
@@ -227,7 +232,7 @@ form > button {
 .aim-panel {
     grid-column:2;
     grid-row:2 / span 3;
-    height:360px;
+    height:100%;
     display:flex;
     align-items:flex-start;
 }
@@ -265,4 +270,12 @@ form > button {
     border-radius:6px;
     color:#edf4ff;
     background:#0f1823;
+}
+.control-card,
+.result-card{
+    background:rgba(35,35,40,.45);
+
+    backdrop-filter:blur(14px);
+
+    border:1px solid rgba(255,255,255,.08);
 }

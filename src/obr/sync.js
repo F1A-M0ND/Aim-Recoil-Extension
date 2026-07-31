@@ -31,7 +31,7 @@ export function onFire(callback){
         console.log("broadcast unavailable")
         return ()=>{}
     }
-    
+
     console.log("OBR.broadcast =", OBR.broadcast)
     return OBR.broadcast.onMessage(
         CHANNEL,
