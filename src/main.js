@@ -6,5 +6,11 @@ const root = document.querySelector('#app')
 const start = () => createApp(root, { isConnected: isObrAvailable() })
 
 // The board API is only safe to call after Owlbear has completed its handshake.
-if (isObrAvailable()) OBR.onReady(start)
+if (isObrAvailable()) OBR.onReady(() => {
+
+    start()
+
+    startFireSync()
+
+})
 else start()

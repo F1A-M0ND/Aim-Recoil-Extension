@@ -1,10 +1,10 @@
 {
-  "name": "Aim System",
-  "version": "0.1.0",
+  "name": "Aim & Recoil System",
+  "version": "0.6.6",
   "manifest_version": 1,
-  "description": "Aim System Test",
+  "description": "Aim & Recoil to Fire",
   "action": {
-    "title": "Aim System",
+    "title": "Aim & Recoil System",
     "icon": "https://f1a-m0nd.github.io/Aim-Recoil-Extension/icon.png",
     "popover": "https://f1a-m0nd.github.io/Aim-Recoil-Extension/",
     "width": 690,

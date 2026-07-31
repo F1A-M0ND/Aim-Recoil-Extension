@@ -1,5 +1,6 @@
 import { AIM_SIZE, fireSeries, getShotCount } from '../logic/calculator.js'
 import { createImpactLayer, showImpact } from '../effect/impact.js'
+import { sendFire, onFire } from "../obr/sync.js"
 
 const DEFAULT_SOUNDS = {
   Bullet: './assets/sounds/bullet.mp3',
@@ -14,6 +15,22 @@ const DEFAULT_SOUNDS = {
 const CELL_LABEL = { PERFECT: 'P', GOOD: 'G', BAD: 'B', MISS: 'M' }
 const cssResult = (result) => result.toLowerCase().replace(' ', '-')
 const fmt = (value) => Number(value).toFixed(2)
+const SHOT_COLORS = {
+  0:"#ff6b6b",
+  1:"#4dabf7",
+  2:"#51cf66",
+  3:"#845ef7",
+  4:"#fcc419",
+  5:"#ff922b",
+  6:"#20c997",
+  7:"#e599f7",
+  8:"#74c0fc",
+  9:"#adb5bd"
+}
+
+function getShotColor(number){
+  return SHOT_COLORS[number % 10]
+}
 
 function fireDelay(rpm){
   if(Number(rpm)<=0) return Infinity
@@ -30,8 +47,9 @@ function cellType(x, y) {
   return 'MISS'
 }
 
-function tableMarkup(shots = []) {
+function tableMarkup(shots = [], global = false) {
   let cells = ''
+
   for (let y = 1; y <= AIM_SIZE; y += 1) {
     for (let x = 1; x <= AIM_SIZE; x += 1) {
       const type = cellType(x, y)
@@ -46,15 +64,37 @@ function tableMarkup(shots = []) {
   const markers = shots.map(({ x, y, result, number }) => {
     const left = ((Math.max(0, Math.min(13, x)) - .5) / AIM_SIZE) * 100
     const top = ((Math.max(0, Math.min(13, y)) - .5) / AIM_SIZE) * 100
-    const stack = stacks.get(`${x.toFixed(4)}:${y.toFixed(4)}`)
-    const overlap = stack.length > 1 ? ` · overlaps #${stack.filter((item) => item !== number).join(', #')}` : ''
-    const offset = stack.length > 1 ? (stack.indexOf(number) - (stack.length - 1) / 2) * 5 : 0
-    return `<button class="shot-marker" data-shot="${number}" style="left:${left}%;top:${top}%;--marker-colour:hsl(${(number % 10) * 36} 78% 52%);--stack-offset:${offset}px" title="Shot #${number}: (${fmt(x)}, ${fmt(y)})${overlap}">${number}</button>`
+
+    const stack = stacks.get(`${x.toFixed(4)}:${y.toFixed(4)}`) || []
+
+    const overlap = stack.length > 1
+        ? ` · overlaps #${stack.filter((item) => item !== number).join(', #')}`
+        : ''
+
+    const offset = stack.length > 1
+        ? (stack.indexOf(number) - (stack.length - 1) / 2) * 5
+        : 0
+
+    return `
+<button
+ class="shot-marker"
+ data-shot="${number}"
+ style="
+   left:${left}%;
+   top:${top}%;
+   --marker-colour:${getShotColor(number)};
+   --stack-offset:${offset}px;
+ "
+ title="#${number}${overlap}"
+>
+ ${number}
+</button>
+`
   }).join('')
   return `<div class="aim-grid">${cells}</div><div class="aim-rings" aria-hidden="true"><i></i><i></i><i></i><b></b><em></em></div><div class="axis-label axis-x">X AXIS</div><div class="axis-label axis-y">Y AXIS</div><div class="marker-layer" aria-label="Shot markers">${markers}</div>`
 }
 
-export function createApp(root, { isConnected }) {
+export async function createApp(root, { isConnected }) {
   root.innerHTML = `
     <main class="app-shell">
       <header><p class="eyebrow">Owlbear Rodeo · Combat Planner</p><h1>Aim System</h1></header>
@@ -248,6 +288,7 @@ Strength
 
   let firedShots = []
   let visibleShots = []
+  let globalShots = []
   let displayedShots = []
   const values = () => Object.fromEntries(new FormData(form))
   const setMode = () => {
@@ -281,10 +322,13 @@ Strength
     table.querySelectorAll('.shot-marker').forEach((marker) => marker.classList.remove('is-focused'))
     resultPanel.querySelectorAll('.shot-output').forEach((row) => row.classList.remove('is-focused'))
   }
-  const renderTable = () => {
+  const renderTable = (global = false) => {
     const oldImpactLayer = table.querySelector('.impact-layer')
 
-    table.innerHTML = tableMarkup(visibleShots)
+    table.innerHTML = tableMarkup(
+        global ? globalShots : visibleShots,
+        global
+    )
 
     if(oldImpactLayer){
       table.appendChild(oldImpactLayer)
@@ -310,91 +354,153 @@ Strength
   form.addEventListener('input', setMode)
   let isFiring = false
 
-  form.addEventListener('submit', async (event)=>{
+  async function playFireAnimation(
+      shots,
+      rpm,
+      global = false
+  ){
+
+    if(rpm <= 0){
+
+      visibleShots.push(...shots)
+      displayedShots.push(...shots)
+
+      renderTable(global)
+      if (!global) {
+        renderSummary(displayedShots)
+      }
+
+      if(fireSoundSelect.value === "Auto"){
+        fireSound = new Audio(getAutoSound())
+        fireSound.volume = 1
+      }
+
+      playFireSound()
+
+      for(const shot of shots){
+        showImpact(shot.x, shot.y)
+      }
+
+      return
+    }
+
+    const delayTime = fireDelay(rpm)
+
+    for(const shot of shots){
+
+      if(global){
+        globalShots.push(shot)
+      }else{
+        visibleShots.push(shot)
+        displayedShots.push(shot)
+      }
+
+      renderTable(global)
+
+      if(!global){
+        renderSummary(displayedShots)
+      }
+
+      if(fireSoundSelect.value === "Auto"){
+        fireSound = new Audio(getAutoSound())
+        fireSound.volume = 1
+      }
+
+      playFireSound()
+      showImpact(shot.x, shot.y)
+
+      await new Promise(r => setTimeout(r, delayTime))
+    }
+  }
+
+  const unsubscribeFire = onFire(async ({ shots, rpm }) => {
+
+    globalShots = shots
+    visibleShots = []
+    firedShots = shots
+
+    table.classList.add("is-firing")
+
+    await playFireAnimation(
+        shots,
+        rpm,
+        true
+    )
+
+    await new Promise(r => setTimeout(r,1000))
+
+    table.classList.remove("is-firing")
+  })
+
+  form.addEventListener('submit', async (event) => {
+
     event.preventDefault()
 
-    if(isFiring) return
+    if (isFiring) return
 
     isFiring = true
 
     const fireButton = form.querySelector('button[type="submit"]')
     fireButton.disabled = true
 
-    // เคลียร์กระสุนเก่า
     firedShots = []
     visibleShots = []
     displayedShots = []
     renderTable()
 
-    // สุ่มกระสุนชุดใหม่
     firedShots = fireSeries(values())
 
-    table.classList.add('is-firing')
-// รอเตรียมยิง 1 วิ
+    table.classList.add("is-firing")
+
     await new Promise(r => setTimeout(r, 1000))
 
     const rpm = Number(values().rpm)
 
-    if(rpm <= 0){
+    await playFireAnimation(
+        firedShots,
+        rpm,
+        false
+    )
 
-      // ยิงพร้อมกันทุกนัด
-      visibleShots = [...firedShots]
-      displayedShots = [...firedShots]
+    try {
 
-      renderTable()
-      renderSummary(displayedShots)
-      if(fireSoundSelect.value === "Auto"){
-        fireSound = new Audio(getAutoSound())
-        fireSound.volume = 1
-      }
-      playFireSound()
+      await sendFire({
+        shots: firedShots,
+        rpm: Number(values().rpm)
+      })
 
-      for(const shot of firedShots){
-        showImpact(
-            shot.x,
-            shot.y
-        )
-      }
+    } catch(error){
 
-    }else{
+      console.log("sync error:", error)
 
-      // ยิงทีละนัดตาม FireRate
-      const delayTime = fireDelay(rpm)
-
-      for(const shot of firedShots){
-
-        visibleShots.push(shot)
-        displayedShots.push(shot)
-
-        renderTable()
-        renderSummary(displayedShots)
-
-        if(fireSoundSelect.value === "Auto"){
-          fireSound = new Audio(getAutoSound())
-          fireSound.volume = 1
-        }
-
-        playFireSound()
-        showImpact(
-            shot.x,
-            shot.y
-        )
-
-        await new Promise(r =>
-            setTimeout(r, delayTime)
-        )
-      }
     }
-    await new Promise(r=>setTimeout(r,1000))
-    table.style.transition="filter 1s ease"
-    table.classList.remove('is-firing')
-    await new Promise(r=>setTimeout(r,500))
-    table.style.transition=""
 
-    const summary = firedShots.reduce((counts, { result }) => ({ ...counts, [result]: (counts[result] || 0) + 1 }), {})
+    await new Promise(r => setTimeout(r,1000))
+
+    table.style.transition = "filter 1s ease"
+    table.classList.remove("is-firing")
+
+    await new Promise(r => setTimeout(r,500))
+
+    table.style.transition = ""
+
+    const summary = firedShots.reduce(
+        (counts,{result})=>({
+          ...counts,
+          [result]:(counts[result]||0)+1
+        }),
+        {}
+    )
+
     renderSummary()
-    shotCount.textContent = `${firedShots.length} shot${firedShots.length === 1 ? '' : 's'} fired`
-    message.textContent = Object.entries(summary).map(([name, count]) => `${count} ${name}`).join(' · ')
+
+    shotCount.textContent =
+        `${firedShots.length} shot${firedShots.length===1?"":"s"} fired`
+
+    message.textContent =
+        Object.entries(summary)
+            .map(([name,count])=>`${count} ${name}`)
+            .join(" · ")
 
     isFiring = false
     fireButton.disabled = false
