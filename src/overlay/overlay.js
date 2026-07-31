@@ -134,25 +134,36 @@ export async function createApp(root) {
     }
 
     try {
-        await onFire(async ({ shots, rpm }) => {
+
+        onFire(async ({ shots, rpm }) => {
+
             console.log("Overlay received", shots, rpm);
+
             overlay.classList.remove("hidden")
+
             globalShots = []
             visibleShots = []
 
-            renderTable(true)
-
             table.classList.add("is-firing")
 
-            await playFireAnimation(shots, rpm, true)
+            await playFireAnimation(
+                shots,
+                rpm,
+                true
+            )
 
-            await new Promise(r => setTimeout(r, 1000))
+            await new Promise(r => setTimeout(r,1000))
 
             table.classList.remove("is-firing")
+
         })
-    } catch (err) {
-        console.error("onFire init failed:", err)
+
+    } catch(err){
+
+        console.error("onFire init failed:",err)
+
     }
+
     renderTable()
     console.log("Overlay app started");
 }

@@ -1,6 +1,7 @@
 import { AIM_SIZE, fireSeries, getShotCount } from '../logic/calculator.js'
 import { createImpactLayer, showImpact } from '../effect/impact.js'
 import { sendFire } from "../obr/sync.js"
+import { openAimOverlay } from "../obr/overlay-call.js"
 
 const DEFAULT_SOUNDS = {
   Bullet: './assets/sounds/bullet.mp3',
@@ -445,6 +446,7 @@ Strength
     )
 
     try {
+      await openAimOverlay()
 
       await sendFire({
         shots: firedShots,
