@@ -4,18 +4,14 @@ const OVERLAY_ID = "com.aim-recoil-extension.overlay"
 
 export async function openAimOverlay(){
 
-    await OBR.onReady()
-
-    await OBR.popover.open({
-
-        id: OVERLAY_ID,
-
-        url: "/Aim-Recoil-Extension/overlay.html",
-
-        width:400,
-
-        height:400
-
+    await new Promise(resolve=>{
+        OBR.onReady(resolve)
     })
 
+    await OBR.popover.open({
+        id: OVERLAY_ID,
+        url: "https://f1a-m0nd.github.io/Aim-Recoil-Extension/overlay.html",
+        width:400,
+        height:400
+    })
 }

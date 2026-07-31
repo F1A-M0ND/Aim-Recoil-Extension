@@ -15,7 +15,7 @@ export async function sendFire(payload){
     try{
 
         const playerId = await OBR.player.getId()
-
+        console.log("sendFire called", payload)
         await OBR.broadcast.sendMessage(
             CHANNEL,
             {
@@ -24,6 +24,7 @@ export async function sendFire(payload){
             }
         )
 
+        console.log("broadcast sent")
     }catch(error){
 
         console.log("sendFire error:", error)
