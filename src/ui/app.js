@@ -413,24 +413,23 @@ Strength
     }
   }
 
-  onFire(async ({ shots, rpm }) => {
+  try {
+    onFire(async ({ shots, rpm }) => {
+      globalShots = []
+      visibleShots = []
+      firedShots = shots
 
-    globalShots = []
-    visibleShots = []
-    firedShots = shots
+      table.classList.add("is-firing")
 
-    table.classList.add("is-firing")
+      await playFireAnimation(shots, rpm, true)
 
-    await playFireAnimation(
-        shots,
-        rpm,
-        true
-    )
+      await new Promise(r => setTimeout(r, 1000))
 
-    await new Promise(r => setTimeout(r,1000))
-
-    table.classList.remove("is-firing")
-  })
+      table.classList.remove("is-firing")
+    })
+  } catch (err) {
+    console.error("onFire init failed:", err)
+  }
 
   form.addEventListener('submit', async (event) => {
 

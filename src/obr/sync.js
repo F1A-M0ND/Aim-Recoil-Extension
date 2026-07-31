@@ -2,39 +2,21 @@ import { OBR } from "./client.js"
 
 const CHANNEL = "com.aim-recoil-extension.fire"
 
-
-async function waitBroadcast(){
-
-    await OBR.onReady()
+export async function sendFire(payload){
 
     if(!OBR.broadcast){
         console.log("broadcast unavailable")
-        return false
-    }
-
-    return true
-}
-
-
-
-export async function sendFire(payload){
-
-    if(!(await waitBroadcast()))
         return
-
+    }
 
     try{
 
         const playerId = await OBR.player.getId()
 
-        await OBR.broadcast.sendMessage(
-            CHANNEL,
-            {
-                ...payload,
-                playerId
-            }
-        )
-
+        await OBR.broadcast.sendMessage(CHANNEL,{
+            ...payload,
+            playerId
+        })
 
     }catch(error){
 
@@ -43,15 +25,14 @@ export async function sendFire(payload){
     }
 }
 
+export function onFire(callback){
 
-
-export async function onFire(callback){
-
-
-    if(!(await waitBroadcast()))
+    if(!OBR.broadcast){
+        console.log("broadcast unavailable")
         return ()=>{}
-
-
+    }
+    
+    console.log("OBR.broadcast =", OBR.broadcast)
     return OBR.broadcast.onMessage(
         CHANNEL,
         async(event)=>{
