@@ -13,18 +13,17 @@ const INSTANCE_ID =
         return id
     })()
 
-
 function waitOBR(){
     return new Promise(resolve=>{
         OBR.onReady(resolve)
     })
 }
 
-
-
 export async function sendFire(payload){
 
     await waitOBR()
+
+    console.log("SEND SOURCE:", INSTANCE_ID)
 
     await OBR.broadcast.sendMessage(
         CHANNEL,
@@ -36,8 +35,6 @@ export async function sendFire(payload){
 
 }
 
-
-
 export async function onFire(callback){
 
     await waitOBR()
@@ -46,8 +43,17 @@ export async function onFire(callback){
         CHANNEL,
         event=>{
 
-            if(event.data.source === INSTANCE_ID)
+            console.log(
+                "RECEIVE SOURCE:",
+                event.data.source,
+                "MY SOURCE:",
+                INSTANCE_ID
+            )
+
+            if(event.data.source === INSTANCE_ID){
+                console.log("IGNORE SELF")
                 return
+            }
 
             callback(event.data)
 
