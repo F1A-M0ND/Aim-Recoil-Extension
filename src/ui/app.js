@@ -446,8 +446,6 @@ Strength
     )
 
     try {
-      await openAimOverlay()
-
       await sendFire({
         shots: firedShots,
         rpm: Number(values().rpm)
