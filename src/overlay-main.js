@@ -1,26 +1,13 @@
-import "./overlay/overlay.css";
-import { OBR, isObrAvailable } from "./obr/client.js";
-import { createApp } from "./overlay/overlay.js";
+import "./overlay/overlay.css"
 
+import { createApp } from "./overlay/overlay"
+import { registerOverlay } from "./overlay/manager"
+import { onFire } from "./obr/sync"
 
-const root = document.querySelector("#app");
+const root = document.querySelector("#app")
 
+const api = await createApp(root)
 
-function start(){
+registerOverlay(api)
 
-    createApp(root);
-
-}
-
-
-if(isObrAvailable()){
-
-    OBR.onReady(()=>{
-        start();
-    });
-
-}else{
-
-    start();
-
-}
+await onFire()

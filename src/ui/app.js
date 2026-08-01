@@ -489,20 +489,5 @@ Strength
   })
   renderTable()
   setMode()
-  return {
-    playRemoteFire: async ({shots,rpm}) => {
 
-      globalShots = []
-      visibleShots = []
-      firedShots = shots
-
-      table.classList.add("is-firing")
-
-      await playFireAnimation(shots,rpm,true)
-
-      await new Promise(r=>setTimeout(r,1000))
-
-      table.classList.remove("is-firing")
-    }
-  }
 }

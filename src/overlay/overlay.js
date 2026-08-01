@@ -1,6 +1,5 @@
 import { AIM_SIZE } from '../logic/calculator.js'
 import { createImpactLayer, showImpact } from '../effect/impact.js'
-import { onFire } from "../obr/sync.js"
 
 const CELL_LABEL = { PERFECT: 'P', GOOD: 'G', BAD: 'B', MISS: 'M' }
 const cssResult = (result) => result.toLowerCase().replace(' ', '-')
@@ -10,7 +9,6 @@ function fireDelay(rpm){
 
     return 60000 / Number(rpm)
 }
-
 
 
 function cellType(x, y) {
@@ -133,11 +131,11 @@ export async function createApp(root) {
         }
     }
 
-    try {
+    renderTable()
+    console.log("Overlay app started");
+    return {
 
-        onFire(async ({ shots, rpm }) => {
-
-            console.log("Overlay received", shots, rpm);
+        async show({ shots, rpm }) {
 
             overlay.classList.remove("hidden")
 
@@ -152,18 +150,16 @@ export async function createApp(root) {
                 true
             )
 
-            await new Promise(r => setTimeout(r,1000))
+            await new Promise(r => setTimeout(r, 1000))
 
             table.classList.remove("is-firing")
+        },
 
-        })
+        hide() {
 
-    } catch(err){
+            overlay.classList.add("hidden")
 
-        console.error("onFire init failed:",err)
+        }
 
     }
-
-    renderTable()
-    console.log("Overlay app started");
 }

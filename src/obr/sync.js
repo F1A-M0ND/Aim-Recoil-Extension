@@ -1,4 +1,5 @@
 import { OBR } from "./client.js"
+import { showOverlay } from "../overlay/manager.js"
 
 const CHANNEL = "com.aim-recoil-extension.fire"
 
@@ -35,7 +36,7 @@ export async function sendFire(payload){
 
 }
 
-export async function onFire(callback){
+export async function onFire(){
 
     await waitOBR()
 
@@ -55,7 +56,7 @@ export async function onFire(callback){
                 return
             }
 
-            callback(event.data)
+            showOverlay(event.data)
 
         }
     )
