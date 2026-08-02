@@ -222,7 +222,7 @@ Strength
     </main>`
 
   preloadSounds()
-  
+
   document.addEventListener(
       "pointerdown",
       unlockAudio,
