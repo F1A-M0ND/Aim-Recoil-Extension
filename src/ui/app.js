@@ -14,34 +14,30 @@ const DEFAULT_SOUNDS = {
 
 const SOUND_CACHE = {}
 
-async function unlockAudio(){
+function unlockAudio(){
 
   if(audioUnlocked)
     return
 
-  for(const sound of Object.values(SOUND_CACHE)){
+  Object.values(SOUND_CACHE).forEach(sound=>{
 
     sound.volume = 0
 
-    try{
+    sound.play()
+        .then(()=>{
 
-      await sound.play()
+          sound.pause()
+          sound.currentTime = 0
 
-      sound.pause()
-      sound.currentTime = 0
+        })
+        .catch(()=>{})
 
-    }catch(error){
+  })
 
-      console.log("audio unlock failed:", error)
-
-    }
-
-  }
 
   audioUnlocked = true
 
   console.log("Audio unlocked")
-
 }
 
 function preloadSounds(){
@@ -226,7 +222,7 @@ Strength
   document.addEventListener(
       "pointerdown",
       unlockAudio,
-      { once:true }
+      { once:true, capture:true }
   )
 
   const form = root.querySelector('#combat-form')
