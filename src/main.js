@@ -19,6 +19,12 @@ if (isObrAvailable()) {
         start()
 
         startPopover()
+        import { showPopover } from "./obr/popover.js"
+        setTimeout(()=>{
+
+            showPopover()
+
+        },3000)
 
     })
 
