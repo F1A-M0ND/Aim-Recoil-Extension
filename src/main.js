@@ -15,17 +15,21 @@ const start = () =>
 
 if (isObrAvailable()) {
 
-    OBR.onReady(()=>{
+    OBR.onReady(async () => {
 
         start()
 
-        startPopover()
+        await startPopover()
 
-        setTimeout(()=>{
+        setTimeout(async () => {
 
-            showPopover()
+            console.log("SHOW")
 
-        },3000)
+            await showPopover()
+
+            console.log("SHOW DONE")
+
+        }, 3000)
 
     })
 
