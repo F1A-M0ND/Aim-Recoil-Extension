@@ -1,7 +1,7 @@
 import { AIM_SIZE, fireSeries, getShotCount } from '../logic/calculator.js'
 import { createImpactLayer, showImpact } from '../effect/impact.js'
 import { sendFire, onFire } from "../obr/sync.js"
-
+let audioUnlocked = false
 const DEFAULT_SOUNDS = {
   Bullet: './assets/sounds/bullet.mp3',
   Handgun: './assets/sounds/handgun.mp3',
@@ -13,6 +13,36 @@ const DEFAULT_SOUNDS = {
 }
 
 const SOUND_CACHE = {}
+
+async function unlockAudio(){
+
+  if(audioUnlocked)
+    return
+
+  for(const sound of Object.values(SOUND_CACHE)){
+
+    sound.volume = 0
+
+    try{
+
+      await sound.play()
+
+      sound.pause()
+      sound.currentTime = 0
+
+    }catch(error){
+
+      console.log("audio unlock failed:", error)
+
+    }
+
+  }
+
+  audioUnlocked = true
+
+  console.log("Audio unlocked")
+
+}
 
 function preloadSounds(){
 
@@ -26,6 +56,12 @@ function preloadSounds(){
     SOUND_CACHE[name] = audio
 
   })
+
+  document.addEventListener(
+      "click",
+      unlockAudio,
+      { once:true }
+  )
 
   console.log("All fire sounds preloaded")
 
@@ -202,6 +238,7 @@ Strength
   const fireSoundSelect = root.querySelector('#fire-sound-select')
   const fireSoundUpload = root.querySelector('#fire-sound-upload')
   let fireSound = SOUND_CACHE.Bullet.cloneNode()
+
   fireSound.volume = 1
 
   fireSoundSelect.addEventListener('change',(event)=>{
@@ -243,6 +280,8 @@ Strength
     }
 
   })
+
+
 
   function playFireSound(){
 
