@@ -26,15 +26,22 @@ export async function createApp(root){
 
             console.log("SHOW OVERLAY")
 
-            overlayRoot.style.display = "flex"
+            const table = root.querySelector("#aim-table")
+
+            console.log("TABLE:", table)
 
             table.innerHTML = `
-                <div class="overlay-text">
-                    FIRE RECEIVED
-                    <br>
-                    ${data.shots.length} shots
-                </div>
-            `
+        <div class="overlay-text">
+            FIRE RECEIVED
+            <br>
+            ${data.shots.length} shots
+        </div>
+    `
+
+            console.log(
+                "HTML AFTER:",
+                table.innerHTML
+            )
 
         },
 
