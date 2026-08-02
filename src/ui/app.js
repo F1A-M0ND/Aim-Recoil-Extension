@@ -17,13 +17,14 @@ const SOUND_CACHE = {}
 function unlockAudio(){
 
   if(audioUnlocked)
-    return
+    return Promise.resolve()
 
-  Object.values(SOUND_CACHE).forEach(sound=>{
+
+  const promises = Object.values(SOUND_CACHE).map(sound=>{
 
     sound.volume = 0
 
-    sound.play()
+    return sound.play()
         .then(()=>{
 
           sound.pause()
@@ -38,6 +39,8 @@ function unlockAudio(){
   audioUnlocked = true
 
   console.log("Audio unlocked")
+
+  return Promise.all(promises)
 }
 
 function preloadSounds(){
@@ -141,6 +144,11 @@ function tableMarkup(shots = [], global = false) {
 
 export async function createApp(root, { isConnected }) {
   root.innerHTML = `
+<div id="audio-unlock-overlay">
+  <div>
+    Click there to enable sound
+  </div>
+</div>
     <main class="app-shell">
       <header><p class="eyebrow">Owlbear Rodeo · Combat Planner</p><h1>Aim System</h1></header>
 <section class="control-card sound-card">
@@ -219,10 +227,18 @@ Strength
 
   preloadSounds()
 
-  document.addEventListener(
+  const audioOverlay = root.querySelector('#audio-unlock-overlay')
+
+  audioOverlay.addEventListener(
       "pointerdown",
-      unlockAudio,
-      { once:true, capture:true }
+      async ()=>{
+
+        await unlockAudio()
+
+        audioOverlay.remove()
+
+      },
+      {once:true}
   )
 
   const form = root.querySelector('#combat-form')

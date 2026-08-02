@@ -13,6 +13,37 @@ body,
     transform-origin: top left;
     overflow:hidden;
 }
+#audio-unlock-overlay {
+    position:absolute;
+    inset:0;
+
+    z-index:9999;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(0,0,0,0.55);
+
+    backdrop-filter:blur(3px);
+
+    cursor:pointer;
+
+    color:white;
+    font-size:1.6rem;
+    font-weight:900;
+
+    text-align:center;
+}
+
+#audio-unlock-overlay div {
+    padding:20px 35px;
+
+    text-shadow:
+            0 0 10px rgba(255,255,255,0.8);
+
+    letter-spacing:.05em;
+}
 .app-shell {
     backdrop-filter:blur(14px);
     -webkit-backdrop-filter:blur(14px);
