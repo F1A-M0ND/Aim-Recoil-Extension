@@ -15,6 +15,7 @@ export async function createApp(root){
     `
 
     const table = root.querySelector("#aim-table")
+    const overlayRoot = root.querySelector(".overlay-root")
 
     createImpactLayer(table)
 
@@ -25,17 +26,15 @@ export async function createApp(root){
 
             console.log("SHOW OVERLAY")
 
-            const overlayRoot = root.querySelector(".overlay-root")
-
             overlayRoot.style.display = "flex"
 
-            overlayRoot.innerHTML = `
-        <div class="overlay-text">
-            FIRE RECEIVED
-            <br>
-            ${data.shots.length} shots
-        </div>
-    `
+            table.innerHTML = `
+                <div class="overlay-text">
+                    FIRE RECEIVED
+                    <br>
+                    ${data.shots.length} shots
+                </div>
+            `
 
         },
 
