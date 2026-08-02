@@ -57,12 +57,6 @@ function preloadSounds(){
 
   })
 
-  document.addEventListener(
-      "click",
-      unlockAudio,
-      { once:true }
-  )
-
   console.log("All fire sounds preloaded")
 
 }
@@ -228,6 +222,12 @@ Strength
     </main>`
 
   preloadSounds()
+  
+  document.addEventListener(
+      "pointerdown",
+      unlockAudio,
+      { once:true }
+  )
 
   const form = root.querySelector('#combat-form')
   const table = root.querySelector('#aim-table')
