@@ -12,15 +12,18 @@ const DEFAULT_SOUNDS = {
   RocketLauncher: './assets/sounds/rocket-launcher.mp3'
 }
 
+const SOUND_CACHE = {}
+
 function preloadSounds(){
 
-  Object.values(DEFAULT_SOUNDS).forEach((src)=>{
+  Object.entries(DEFAULT_SOUNDS).forEach(([name,src])=>{
 
     const audio = new Audio(src)
 
     audio.preload = "auto"
-
     audio.load()
+
+    SOUND_CACHE[name] = audio
 
   })
 
@@ -187,7 +190,9 @@ Strength
         <p class="action-message" id="action-message"></p>
       </section>
     </main>`
+
   preloadSounds()
+
   const form = root.querySelector('#combat-form')
   const table = root.querySelector('#aim-table')
   createImpactLayer(table)
@@ -196,7 +201,8 @@ Strength
   const message = root.querySelector('#action-message')
   const fireSoundSelect = root.querySelector('#fire-sound-select')
   const fireSoundUpload = root.querySelector('#fire-sound-upload')
-  let fireSound = null
+  let fireSound = SOUND_CACHE.Bullet.cloneNode()
+  fireSound.volume = 1
 
   fireSoundSelect.addEventListener('change',(event)=>{
 
@@ -240,23 +246,37 @@ Strength
 
   function playFireSound(){
 
+    if(fireSoundSelect.value === "Auto"){
+
+      const autoSrc = getAutoSound()
+
+      const sound = new Audio(autoSrc)
+
+      sound.volume = 1
+      sound.currentTime = 0
+
+      sound.play()
+          .catch(error=>{
+            console.log("sound error:", error)
+          })
+
+      return
+    }
+
+
     if(!fireSound)
       return
+
 
     const sound = fireSound.cloneNode()
 
     sound.volume = fireSound.volume
     sound.currentTime = 0
-    sound.preload = "auto"
 
     sound.play()
         .catch(error=>{
           console.log("sound error:", error)
         })
-
-    sound.onended = () => {
-      sound.remove()
-    }
 
   }
 
