@@ -1,7 +1,7 @@
 export async function createApp(root){
 
     root.innerHTML = `
-        <h1>Overlay Loaded</h1>
+        <div id="overlay-root"></div>
     `
 
     console.log("Overlay Loaded")
