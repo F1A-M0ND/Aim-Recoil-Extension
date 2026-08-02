@@ -21,16 +21,6 @@ if (isObrAvailable()) {
 
         await startPopover()
 
-        setTimeout(async () => {
-
-            console.log("SHOW")
-
-            await showPopover()
-
-            console.log("SHOW DONE")
-
-        }, 3000)
-
     })
 
 } else {
