@@ -4,6 +4,7 @@ import { createApp } from './ui/app.js'
 import { onFire } from "./obr/sync"
 import { showFireEffect } from "./obr/effect"
 import { startPopover } from "./obr/popover.js"
+import { showPopover } from "./obr/popover.js"
 
 const root = document.querySelector('#app')
 
@@ -19,7 +20,7 @@ if (isObrAvailable()) {
         start()
 
         startPopover()
-        import { showPopover } from "./obr/popover.js"
+
         setTimeout(()=>{
 
             showPopover()
