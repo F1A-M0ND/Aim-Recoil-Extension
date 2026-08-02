@@ -12,6 +12,22 @@ const DEFAULT_SOUNDS = {
   RocketLauncher: './assets/sounds/rocket-launcher.mp3'
 }
 
+function preloadSounds(){
+
+  Object.values(DEFAULT_SOUNDS).forEach((src)=>{
+
+    const audio = new Audio(src)
+
+    audio.preload = "auto"
+
+    audio.load()
+
+  })
+
+  console.log("All fire sounds preloaded")
+
+}
+
 const CELL_LABEL = { PERFECT: 'P', GOOD: 'G', BAD: 'B', MISS: 'M' }
 const cssResult = (result) => result.toLowerCase().replace(' ', '-')
 const fmt = (value) => Number(value).toFixed(2)
@@ -171,7 +187,7 @@ Strength
         <p class="action-message" id="action-message"></p>
       </section>
     </main>`
-
+  preloadSounds()
   const form = root.querySelector('#combat-form')
   const table = root.querySelector('#aim-table')
   createImpactLayer(table)
@@ -370,11 +386,6 @@ Strength
         renderSummary(displayedShots)
       }
 
-      if(fireSoundSelect.value === "Auto"){
-        fireSound = new Audio(getAutoSound())
-        fireSound.volume = 1
-      }
-
       playFireSound()
 
       for(const shot of shots){
@@ -399,11 +410,6 @@ Strength
 
       if(!global){
         renderSummary(displayedShots)
-      }
-
-      if(fireSoundSelect.value === "Auto"){
-        fireSound = new Audio(getAutoSound())
-        fireSound.volume = 1
       }
 
       playFireSound()

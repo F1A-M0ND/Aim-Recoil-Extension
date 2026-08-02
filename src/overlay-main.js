@@ -1,14 +1,19 @@
 import "./overlay/overlay.css"
 
+import { OBR } from "./obr/client"
 import { createApp } from "./overlay/overlay"
 import { onFire } from "./obr/sync"
 
-const root = document.querySelector("#app")
+OBR.onReady(async()=>{
 
-const overlay = await createApp(root)
+    const root = document.querySelector("#app")
 
-onFire(async(data)=>{
+    const overlay = await createApp(root)
 
-    overlay.show(data)
+    await onFire((data)=>{
+
+        overlay.show(data)
+
+    })
 
 })
