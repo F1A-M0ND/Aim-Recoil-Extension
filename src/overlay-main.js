@@ -20,7 +20,7 @@ OBR.onReady(async()=>{
     console.log("Overlay App Created")
 
 
-    await onFire((data)=>{
+    onFire((data)=>{
 
         console.log("Overlay Fire Received:", data)
 
