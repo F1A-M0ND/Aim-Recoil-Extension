@@ -23,24 +23,19 @@ export async function createApp(root){
 
         async show(data){
 
-            console.log("OVERLAY FIRE:", data)
+            console.log("SHOW OVERLAY")
 
-            table.innerHTML = `
-                <div class="overlay-text">
-                    FIRE RECEIVED
-                    <br>
-                    ${data.shots.length} shots
-                </div>
-            `
+            const overlayRoot = root.querySelector(".overlay-root")
 
-            for(const shot of data.shots){
+            overlayRoot.style.display = "flex"
 
-                showImpact(
-                    shot.x,
-                    shot.y
-                )
-
-            }
+            overlayRoot.innerHTML = `
+        <div class="overlay-text">
+            FIRE RECEIVED
+            <br>
+            ${data.shots.length} shots
+        </div>
+    `
 
         },
 
