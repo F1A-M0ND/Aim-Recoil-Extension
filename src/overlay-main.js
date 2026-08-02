@@ -1,4 +1,3 @@
-import "./overlay/overlay.css"
 import { createApp } from "./overlay/overlay.js"
 
 const root = document.querySelector("#app")
