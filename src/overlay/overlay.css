@@ -76,21 +76,24 @@ body,
 
     box-sizing:border-box;
 
+    overflow:hidden;   /* เพิ่ม */
 }
 
 
 /* TABLE AREA */
+.overlay-table{
 
-.overlay-table {
+    flex:1;
 
-    height:min(85vh, 70vw);
+    min-width:0;
 
     aspect-ratio:1 / 1;
 
-    flex-shrink:0;
+    max-height:85vh;
+
+    display:flex;
 
 }
-
 
 .aim-table {
 
@@ -98,6 +101,7 @@ body,
 
     width:100%;
     height:100%;
+    aspect-ratio:1/1;
 
     overflow:hidden;
 
