@@ -29,9 +29,16 @@ export async function sendFire(payload){
 
         const playerId = await OBR.player.getId()
 
+        const player = await OBR.party.getPlayers()
+
+        const me = player.find(
+            p => p.connectionId === playerId
+        )
+
         await OBR.broadcast.sendMessage(CHANNEL,{
             ...payload,
-            playerId
+            playerId,
+            playerName: me?.name ?? "Unknown"
         })
 
     }catch(error){

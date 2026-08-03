@@ -491,7 +491,7 @@ Strength
   }
 
   try {
-    onFire(async ({ shots, rpm }) => {
+    onFire(async ({ shots, rpm, summary, playerName }) => {
       globalShots = []
       visibleShots = []
       firedShots = shots
@@ -540,9 +540,18 @@ Strength
 
     try {
 
+      const summary = firedShots.reduce(
+          (counts,{result})=>({
+            ...counts,
+            [result]:(counts[result]||0)+1
+          }),
+          {}
+      )
+
       await sendFire({
         shots: firedShots,
-        rpm: Number(values().rpm)
+        rpm: Number(values().rpm),
+        summary
       })
 
     } catch(error){
