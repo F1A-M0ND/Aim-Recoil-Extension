@@ -372,15 +372,28 @@ body,
 
 .overlay-info{
 
+
+
+}
+.overlay-info {
+
     width:180px;
+
+    padding:18px;
+
+    background:transparent;
+
+    backdrop-filter:none;
+
+    border:none;
+
+    border-radius:0;
 
     display:flex;
     flex-direction:column;
 
     gap:18px;
-
 }
-
 
 
 .player-name{
