@@ -1,5 +1,6 @@
 :root {
     color:#edf4ff;
+    background:transparent;
     font-family:Inter,ui-sans-serif,system-ui,sans-serif;
 }
 
@@ -11,121 +12,404 @@ body,
     width:100%;
     height:100%;
 
-    margin:0;
+    background:transparent;
 
     overflow:hidden;
 
-    background:transparent;
 }
 
+
+/* ROOT LAYOUT */
 
 .overlay-root {
 
-    width:400px;
-    height:300px;
-
-    display:flex;
-
-    padding:12px;
-
-    box-sizing:border-box;
-
-    gap:14px;
-
-
-    background:rgba(15,24,35,0.75);
-
-    backdrop-filter:blur(14px);
-
-    border-radius:14px;
-
-    border:1px solid rgba(255,255,255,0.08);
-
-}
-
-
-/* ฝั่งตาราง */
-
-.overlay-table {
-
+    width:100%;
     height:100%;
 
-    aspect-ratio:1 / 1;
-
-    flex-shrink:0;
-
-}
-
-
-/* ฝั่งข้อมูล */
-
-.overlay-info {
-
-    flex:1;
-
     display:flex;
 
-    flex-direction:column;
+    align-items:center;
 
     justify-content:center;
 
-    align-items:flex-start;
-
-    gap:8px;
+    gap:20px;
 
 }
+
+
+/* TABLE AREA */
+
+.overlay-table {
+
+    height:90vh;
+    aspect-ratio:1/1;
+
+}
+
+
+.aim-table {
+
+    position:relative;
+
+    width:100%;
+    height:100%;
+
+    overflow:hidden;
+
+    border:1px solid #354b63;
+
+    border-radius:10px;
+
+    background:#0f1823;
+
+}
+
+
+/* GRID */
+
+.aim-grid {
+
+    position:absolute;
+
+    inset:0;
+
+    display:grid;
+
+    grid-template-columns:repeat(12,1fr);
+
+    overflow:hidden;
+
+    border-radius:8px;
+
+}
+
+
+
+.aim-cell {
+
+    display:grid;
+
+    place-items:center;
+
+    border-right:1px solid #d7b8a9;
+
+    border-bottom:1px solid #d7b8a9;
+
+    font-size:.8rem;
+
+    font-weight:900;
+
+}
+
+
+
+.aim-cell.miss {
+
+    color:#ffe0dd;
+
+    background:#f1635c;
+
+}
+
+
+.aim-cell.bad {
+
+    color:#452414;
+
+    background:#f89d59;
+
+}
+
+
+.aim-cell.good {
+
+    color:#3e3516;
+
+    background:#f9d36b;
+
+}
+
+
+.aim-cell.perfect {
+
+    color:#544f17;
+
+    background:#fff896;
+
+}
+
+
+
+/* AIM RINGS */
+
+.aim-rings {
+
+    position:absolute;
+
+    inset:0;
+
+    pointer-events:none;
+
+}
+
+
+.aim-rings i {
+
+    position:absolute;
+
+    left:50%;
+
+    top:50%;
+
+    border:3px solid #15202d;
+
+    border-radius:50%;
+
+    transform:translate(-50%,-50%);
+
+}
+
+
+.aim-rings i:nth-child(1){
+
+    width:25%;
+
+    height:25%;
+
+}
+
+
+.aim-rings i:nth-child(2){
+
+    width:54%;
+
+    height:54%;
+
+}
+
+
+.aim-rings i:nth-child(3){
+
+    width:88%;
+
+    height:88%;
+
+    border-width:4px;
+
+}
+
+
+.aim-rings b,
+.aim-rings em {
+
+    position:absolute;
+
+    display:block;
+
+    background:#15202d;
+
+}
+
+
+.aim-rings b {
+
+    left:0;
+
+    top:50%;
+
+    width:100%;
+
+    height:3px;
+
+    transform:translateY(-50%);
+
+}
+
+
+.aim-rings em {
+
+    top:0;
+
+    left:50%;
+
+    width:3px;
+
+    height:100%;
+
+    transform:translateX(-50%);
+
+}
+
+
+
+/* SHOT MARKER */
+
+.marker-layer {
+
+    position:absolute;
+
+    inset:0;
+
+    z-index:5;
+
+}
+
+
+
+.shot-marker {
+
+    position:absolute;
+
+    z-index:6;
+
+
+    width:18px;
+
+    height:18px;
+
+
+    display:grid;
+
+    place-items:center;
+
+
+    padding:0;
+
+    margin:0;
+
+
+    border-radius:50%;
+
+
+    border:2px solid var(--marker-colour);
+
+
+    background:var(--marker-colour);
+
+    color:white;
+
+
+    font-size:8px;
+
+    font-weight:900;
+
+
+    transform:translate(-50%,-50%);
+
+
+    box-shadow:
+
+            0 0 0 2px rgba(255,255,255,.9),
+
+            0 0 8px var(--marker-colour);
+
+}
+
+
+/* IMPACT EFFECT */
+
+.impact-layer {
+
+    position:absolute;
+
+    inset:0;
+
+    z-index:10;
+
+    pointer-events:none;
+
+    overflow:hidden;
+
+}
+
+
+
+/* INFO PANEL */
+
+.overlay-info {
+
+    width:220px;
+
+    padding:18px;
+
+
+    background:rgba(15,24,35,.65);
+
+
+    backdrop-filter:blur(10px);
+
+
+    border:
+
+            1px solid rgba(255,255,255,.1);
+
+
+    border-radius:12px;
+
+
+}
+
 
 
 .player-name {
 
-    font-size:1.1rem;
+    font-size:1.4rem;
 
-    font-weight:800;
+    font-weight:900;
 
-    color:white;
+    margin-bottom:20px;
 
 }
+
 
 
 .result-line {
 
-    width:100%;
+    display:flex;
 
-    text-align:left;
+    justify-content:space-between;
 
-    font-size:.9rem;
+    padding:8px 0;
 
-    color:#cbd8e8;
+    font-weight:700;
 
 }
+
 
 
 .result-line span {
 
-    float:right;
-
-    font-weight:800;
+    font-weight:900;
 
 }
 
 
+
+/* COLORS */
+
 .perfect {
-    color:#fff896;
+
+    color:#92ffba;
+
 }
 
 
 .good {
-    color:#f9d36b;
+
+    color:#76e5fb;
+
 }
 
 
 .bad {
-    color:#f89d59;
+
+    color:#ffc569;
+
 }
 
 
 .miss {
 
-    color:#f1635c;
+    color:#f8889c;
 
 }

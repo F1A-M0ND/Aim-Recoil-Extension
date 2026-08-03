@@ -193,7 +193,7 @@ export async function createApp(root){
         async show(data){
 
             console.log("SHOW OVERLAY",data)
-            
+
             table.innerHTML = tableMarkup(
                 data.shots ?? []
             )
