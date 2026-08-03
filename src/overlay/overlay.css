@@ -39,9 +39,9 @@ body,
 
 .overlay-header{
 
-    width:calc(90vh + 220px + 20px);
+    width:calc(90vh + 140px);
 
-    margin-bottom:10px;
+    margin-bottom:4px;
 
 }
 
@@ -54,7 +54,6 @@ body,
     align-items:center;
 
 }
-
 
 /* TABLE AREA */
 
@@ -382,7 +381,9 @@ body,
 
     font-weight:900;
 
-    margin-bottom:12px;
+    margin-bottom:6px;
+
+    line-height:1.2;
 
 }
 
