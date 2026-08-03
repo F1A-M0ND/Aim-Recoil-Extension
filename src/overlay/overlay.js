@@ -179,6 +179,7 @@ export async function createApp(root){
 </div>
 `
     console.log(root.innerHTML)
+    console.log(root.firstElementChild?.outerHTML)
 
     const table = root.querySelector("#overlay-aim-table")
 
