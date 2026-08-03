@@ -39,7 +39,9 @@ body,
 .overlay-content{
 
     display:flex;
+
     align-items:center;
+
     gap:20px;
 
 }
@@ -83,15 +85,11 @@ body,
 /* TABLE AREA */
 .overlay-table{
 
-    flex:1;
+    flex:none;
 
-    min-width:0;
+    height:min(85vh,70vw);
 
-    aspect-ratio:1 / 1;
-
-    max-height:85vh;
-
-    display:flex;
+    aspect-ratio:1/1;
 
 }
 

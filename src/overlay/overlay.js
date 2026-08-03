@@ -137,38 +137,22 @@ export async function createApp(root){
     root.innerHTML = `
 <div class="overlay-root">
 
-    <div
-        class="player-name"
-        id="player-name"
-        title=""
-    ></div>
+    <div class="overlay-panel">
 
-    <div class="overlay-content">
+        <div
+            class="player-name"
+            id="player-name"
+            title=""
+        ></div>
 
-        <div class="overlay-table">
-            <div class="aim-table" id="overlay-aim-table"></div>
-        </div>
+        <div class="overlay-content">
 
-        <div class="overlay-info">
-
-            <div class="result-block perfect">
-                <div>PERFECT</div>
-                <span id="perfect-count">▸ 0 ◂</span>
+            <div class="overlay-table">
+                <div class="aim-table" id="overlay-aim-table"></div>
             </div>
 
-            <div class="result-block good">
-                <div>GOOD</div>
-                <span id="good-count">▸ 0 ◂</span>
-            </div>
-
-            <div class="result-block bad">
-                <div>BAD</div>
-                <span id="bad-count">▸ 0 ◂</span>
-            </div>
-
-            <div class="result-block miss">
-                <div>MISS</div>
-                <span id="miss-count">▸ 0 ◂</span>
+            <div class="overlay-info">
+                ...
             </div>
 
         </div>
