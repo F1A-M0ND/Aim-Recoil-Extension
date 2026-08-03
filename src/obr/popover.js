@@ -14,8 +14,8 @@ export async function startPopover(){
 
         url: "/Aim-Recoil-Extension/overlay.html",
 
-        width:0,
-        height:0,
+        width:400,
+        height:400,
 
         hidePaper:true,
         disableClickAway:true,
