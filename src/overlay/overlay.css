@@ -21,15 +21,26 @@ body,
 
 /* ROOT LAYOUT */
 
-.overlay-root {
+.overlay-root{
 
     width:100%;
     height:100%;
 
     display:flex;
+    flex-direction:column;
 
     align-items:center;
     justify-content:center;
+
+    gap:14px;
+
+}
+
+.overlay-content{
+
+    display:flex;
+    align-items:center;
+    gap:20px;
 
 }
 
@@ -49,7 +60,7 @@ body,
     max-height:95vh;
 
 
-    background:rgba(15,24,35,.55);
+    background:transparent;
 
 
     backdrop-filter:blur(14px);
@@ -121,16 +132,13 @@ body,
 
 .aim-cell {
 
-    display:grid;
+    border:none;
 
-    place-items:center;
+    color:transparent;
 
-    border-right:.5px solid #d7b8a9;
-    border-bottom:.5px solid #d7b8a9;
+    background:transparent;
 
-    font-size:.55rem;
-
-    font-weight:900;
+    font-size:0;
 
 }
 
@@ -321,7 +329,7 @@ body,
     color:white;
 
 
-    font-size:8px;
+    font-size:6px;
 
     font-weight:900;
 
@@ -358,58 +366,59 @@ body,
 
 /* INFO PANEL */
 
-.overlay-info {
+.overlay-info{
 
-    width:220px;
+    width:180px;
 
-    padding:18px;
+    display:flex;
+    flex-direction:column;
 
-
-    background:rgba(15,24,35,.65);
-
-
-    backdrop-filter:blur(10px);
-
-
-    border:
-
-            1px solid rgba(255,255,255,.1);
-
-
-    border-radius:12px;
-
+    gap:18px;
 
 }
 
 
 
-.player-name {
+.player-name{
 
-    font-size:1.4rem;
+    width:min(90vw,900px);
+
+    text-align:center;
+
+    font-size:1rem;
+    font-weight:800;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+}
+
+
+
+.result-block{
+
+    text-align:center;
+
+}
+
+.result-block div{
+
+    font-size:.9rem;
 
     font-weight:900;
 
-    margin-bottom:20px;
+    letter-spacing:.08em;
 
 }
 
+.result-block span{
 
+    display:block;
 
-.result-line {
+    margin-top:4px;
 
-    display:flex;
-
-    justify-content:space-between;
-
-    padding:8px 0;
-
-    font-weight:700;
-
-}
-
-
-
-.result-line span {
+    font-size:1.1rem;
 
     font-weight:900;
 

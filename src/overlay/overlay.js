@@ -135,50 +135,47 @@ function tableMarkup(shots=[]){
 export async function createApp(root){
 
     root.innerHTML = `
-
 <div class="overlay-root">
 
-    <div class="overlay-panel">
+    <div
+        class="player-name"
+        id="player-name"
+        title=""
+    ></div>
+
+    <div class="overlay-content">
 
         <div class="overlay-table">
-            <div class="aim-table" id="overlay-aim-table">
-            </div>
+            <div class="aim-table" id="overlay-aim-table"></div>
         </div>
-
 
         <div class="overlay-info">
 
-        <div class="player-name" id="player-name">
-        </div>
+            <div class="result-block perfect">
+                <div>PERFECT</div>
+                <span id="perfect-count">▸ 0 ◂</span>
+            </div>
 
+            <div class="result-block good">
+                <div>GOOD</div>
+                <span id="good-count">▸ 0 ◂</span>
+            </div>
 
-        <div class="result-line perfect">
-            Perfect
-            <span id="perfect-count">0</span>
-        </div>
+            <div class="result-block bad">
+                <div>BAD</div>
+                <span id="bad-count">▸ 0 ◂</span>
+            </div>
 
+            <div class="result-block miss">
+                <div>MISS</div>
+                <span id="miss-count">▸ 0 ◂</span>
+            </div>
 
-        <div class="result-line good">
-            Good
-            <span id="good-count">0</span>
-        </div>
-
-
-        <div class="result-line bad">
-            Bad
-            <span id="bad-count">0</span>
-        </div>
-
-
-        <div class="result-line miss">
-            Miss
-            <span id="miss-count">0</span>
         </div>
 
     </div>
 
 </div>
-
 `
 
 
@@ -202,9 +199,17 @@ export async function createApp(root){
 
             const summary = data.summary ?? {}
 
+            const playerName =
+                data.playerName ?? "Unknown"
+
+            const nameEl =
+                root.querySelector("#player-name")
+
+            nameEl.textContent = playerName
+            nameEl.title = playerName
 
             root.querySelector("#player-name").textContent =
-                data.playerName ?? "Unknown"
+                playerName
 
 
             root.querySelector("#perfect-count").textContent =
