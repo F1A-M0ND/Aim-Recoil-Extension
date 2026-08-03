@@ -30,7 +30,8 @@ export async function sendFire(payload){
         const playerId = await OBR.player.getId()
 
         const player = await OBR.party.getPlayers()
-
+        console.log("MY ID:", playerId)
+        console.log("PLAYERS:", player)
         const me = player.find(
             p => p.connectionId === playerId
         )
