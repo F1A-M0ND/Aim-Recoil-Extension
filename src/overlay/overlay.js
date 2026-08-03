@@ -152,7 +152,24 @@ export async function createApp(root){
             </div>
 
             <div class="overlay-info">
-                ...
+                <div class="result-block perfect">
+                <div>PERFECT</div>
+                <span id="perfect-count">▸ 0 ◂</span>
+            </div>
+
+            <div class="result-block good">
+                <div>GOOD</div>
+                <span id="good-count">▸ 0 ◂</span>
+            </div>
+
+            <div class="result-block bad">
+                <div>BAD</div>
+                <span id="bad-count">▸ 0 ◂</span>
+            </div>
+
+            <div class="result-block miss">
+                <div>MISS</div>
+                <span id="miss-count">▸ 0 ◂</span>
             </div>
 
         </div>
