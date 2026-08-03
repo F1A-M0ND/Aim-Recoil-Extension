@@ -17,9 +17,13 @@ if (isObrAvailable()) {
 
     OBR.onReady(async () => {
 
-        start()
+        await start()
 
         await startPopover()
+
+        setTimeout(()=>{
+            showPopover()
+        },3000)
 
     })
 

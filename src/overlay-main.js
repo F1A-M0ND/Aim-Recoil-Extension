@@ -3,32 +3,24 @@ import "./overlay/overlay.css"
 import { OBR } from "./obr/client.js"
 import { createApp } from "./overlay/overlay.js"
 import { onFire } from "./obr/sync.js"
+import { showPopover } from "./obr/popover.js"
 
 
 OBR.onReady(async()=>{
 
-    console.log("Overlay OBR Ready")
+    const root=document.querySelector("#app")
+
+    const overlay=await createApp(root)
+
+    console.log("Overlay Visible")
 
 
-    const root = document.querySelector("#app")
+    await onFire(async (data) => {
 
-    console.log("Overlay Root:", root)
+        await showPopover()
 
-
-    const overlay = await createApp(root)
-
-    console.log("Overlay App Created")
-
-
-    onFire((data)=>{
-
-        console.log("Overlay Fire Received:", data)
-
-        overlay.show(data)
+        await overlay.show(data)
 
     })
-
-
-    console.log("Overlay Listener Started")
 
 })

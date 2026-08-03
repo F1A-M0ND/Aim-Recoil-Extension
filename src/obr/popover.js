@@ -12,7 +12,7 @@ export async function startPopover(){
 
         id: POPOVER_ID,
 
-        url: "/Aim-Recoil-Extension/overlay.html",
+        url:"/Aim-Recoil-Extension/overlay.html",
 
         width:0,
         height:0,
@@ -33,19 +33,29 @@ export async function startPopover(){
 
     })
 
+    console.log("POPOVER OPENED")
+
 }
 
+
 export async function showPopover(){
+
+    console.log("SHOW POPOVER START")
 
     await OBR.popover.setWidth(
         POPOVER_ID,
         POPOVER_WIDTH
     )
 
+    console.log("WIDTH DONE")
+
+
     await OBR.popover.setHeight(
         POPOVER_ID,
         POPOVER_HEIGHT
     )
+
+    console.log("HEIGHT DONE")
 
 }
 
