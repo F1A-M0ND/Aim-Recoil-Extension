@@ -24,19 +24,34 @@ export async function createApp(root){
 
         async show(data){
 
-            console.log("SHOW OVERLAY")
+            console.log("SHOW OVERLAY", data)
 
-            const table = root.querySelector("#aim-table")
+            const summary = data.summary ?? {}
 
-            console.log("TABLE:", table)
+            overlayRoot.style.display = "flex"
 
-            table.innerHTML = `
+            overlayRoot.innerHTML = `
         <div class="overlay-text">
-            FIRE RECEIVED
-            <br>
-            ${data.shots.length} shots
-        </div>
-    `
+
+            <h2>${data.playerName ?? "Unknown"}</h2>
+
+            <div>
+                Perfect: ${summary.PERFECT ?? 0}
+            </div>
+
+            <div>
+                Good: ${summary.GOOD ?? 0}
+            </div>
+
+            <div>
+                Bad: ${summary.BAD ?? 0}
+            </div>
+
+            <div>
+                Miss: ${summary.MISS ?? 0}
+            </div>
+
+        </div>`
 
             console.log(
                 "HTML AFTER:",

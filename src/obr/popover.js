@@ -1,8 +1,8 @@
 import { OBR } from "./client.js"
 
 const POPOVER_ID = "com.aim-recoil-extension.popover"
-const POPOVER_WIDTH = 300
-const POPOVER_HEIGHT = 200
+const POPOVER_WIDTH = 400
+const POPOVER_HEIGHT = 300
 
 export async function startPopover(){
 
