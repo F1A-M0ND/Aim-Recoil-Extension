@@ -21,10 +21,6 @@ if (isObrAvailable()) {
 
         await startPopover()
 
-        setTimeout(()=>{
-            showPopover()
-        },3000)
-
     })
 
 } else {
