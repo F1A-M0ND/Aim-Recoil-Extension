@@ -180,6 +180,11 @@ export async function createApp(root){
 `
     console.log(root.innerHTML)
     console.log(root.firstElementChild?.outerHTML)
+    console.log(root.querySelector(".overlay-panel").getBoundingClientRect())
+    console.log(root.querySelector(".overlay-content").getBoundingClientRect())
+    console.log(root.querySelector(".overlay-table").getBoundingClientRect())
+    console.log(root.querySelector(".overlay-info").getBoundingClientRect())
+    console.log(root.querySelector(".player-name").getBoundingClientRect())
 
     const table = root.querySelector("#overlay-aim-table")
 
