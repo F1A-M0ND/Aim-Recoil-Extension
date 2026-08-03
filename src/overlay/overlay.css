@@ -60,7 +60,7 @@ body,
     max-height:95vh;
 
 
-    background:transparent;
+    background:rgba(15,24,35,0.45);
 
 
     backdrop-filter:blur(14px);
