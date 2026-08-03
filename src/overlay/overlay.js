@@ -71,9 +71,7 @@ function tableMarkup(shots=[]){
             const type = cellType(x,y)
 
             cells += `
-            <span class="aim-cell ${cssResult(type)}">
-            ${CELL_LABEL[type]}
-            </span>
+            <span class="aim-cell ${cssResult(type)}"></span>
             `
         }
 
@@ -197,8 +195,14 @@ export async function createApp(root){
             const summary = data.summary ?? {}
 
 
-            root.querySelector("#player-name").textContent =
+            const playerName =
+                root.querySelector("#player-name")
+
+            const name =
                 data.playerName ?? "Unknown"
+
+            playerName.textContent = name
+            playerName.title = name
 
 
             root.querySelector("#perfect-count").textContent =
