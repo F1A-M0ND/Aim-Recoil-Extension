@@ -32,6 +32,9 @@ body,
     justify-content:center;
     align-items:center;
 
+    transform:scale(0.75);
+    transform-origin:center center;
+
 }
 
 .overlay-header{
