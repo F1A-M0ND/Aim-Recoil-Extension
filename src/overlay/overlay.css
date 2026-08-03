@@ -37,49 +37,42 @@ body,
 }
 
 .overlay-content{
-    
-    max-width:95vw;
+
     display:flex;
+
     align-items:center;
 
-    gap:24px;
+    justify-content:flex-start;
 
-    padding-left:18px;
-    padding-right:18px;
+    gap:18px;
 
-    box-sizing:border-box;
+    padding-left:14px;
 
 }
 
 .overlay-panel {
 
     display:flex;
+    flex-direction:column;
 
     align-items:center;
 
-    gap:20px;
-
+    gap:12px;
 
     padding:20px;
-
 
     max-width:95vw;
     max-height:95vh;
 
-
     background:rgba(15,24,35,0.45);
 
-
     backdrop-filter:blur(14px);
-
 
     border:
 
             1px solid rgba(255,255,255,.08);
 
-
     border-radius:16px;
-
 
     box-sizing:border-box;
 
@@ -90,27 +83,21 @@ body,
 /* TABLE AREA */
 .overlay-table{
 
-    flex:1 1 auto;
+    flex:none;
 
-    min-width:0;
+    width:min(70vh,70vw);
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+    height:min(70vh,70vw);
 
-    padding-left:18px;
-
-    box-sizing:border-box;
 }
 
-.aim-table {
-
-    width:min(72vh,72vw);
-    flex:none;
+.aim-table{
 
     position:relative;
 
+    width:100%;
     height:100%;
+
     aspect-ratio:1/1;
 
     overflow:hidden;
@@ -406,26 +393,23 @@ body,
     flex:0 0 170px;
 }
 
-
 .player-name{
 
     width:100%;
 
     text-align:center;
 
-    font-size:1rem;
+    font-size:.9rem;
+
     font-weight:800;
+
+    margin-bottom:6px;
 
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
 
-    padding:0 24px;
-    box-sizing:border-box;
-
 }
-
-
 
 .result-block{
 
