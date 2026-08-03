@@ -21,18 +21,34 @@ body,
 
 /* ROOT LAYOUT */
 
-.overlay-root {
+.overlay-root{
 
     width:100%;
     height:100%;
 
     display:flex;
-
-    align-items:center;
+    flex-direction:column;
 
     justify-content:center;
+    align-items:center;
+
+}
+
+.overlay-header{
+
+    width:calc(90vh + 220px + 20px);
+
+    margin-bottom:10px;
+
+}
+
+.overlay-body{
+
+    display:flex;
 
     gap:20px;
+
+    align-items:center;
 
 }
 
@@ -367,21 +383,30 @@ body,
 
 }
 
-.result-line {
+.result-line{
 
     display:flex;
+    flex-direction:column;
 
-    justify-content:space-between;
+    align-items:center;
 
-    padding:8px 0;
-
-    font-weight:700;
+    gap:6px;
 
 }
 
 
 
-.result-line span {
+.result-line span{
+
+    min-width:56px;
+
+    padding:4px 10px;
+
+    border-radius:6px;
+
+    background:#162231;
+
+    text-align:center;
 
     font-weight:900;
 

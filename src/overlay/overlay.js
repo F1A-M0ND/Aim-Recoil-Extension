@@ -3,13 +3,6 @@ import "./overlay.css"
 import { createImpactLayer } from "../effect/impact.js"
 import { AIM_SIZE } from "../logic/calculator.js"
 
-const CELL_LABEL = {
-    PERFECT:'P',
-    GOOD:'G',
-    BAD:'B',
-    MISS:'M'
-}
-
 const cssResult = (result)=>
     result.toLowerCase().replace(' ','-')
 
@@ -136,8 +129,13 @@ export async function createApp(root){
 
 <div class="overlay-root">
 
-<div class="player-name" id="player-name"></div>
-    <div class="overlay-table">
+    <div class="overlay-header">
+        <div class="player-name" id="player-name"></div>
+    </div>
+
+    <div class="overlay-body">
+
+        <div class="overlay-table">
         <div class="aim-table" id="overlay-aim-table">
         </div>
     </div>
