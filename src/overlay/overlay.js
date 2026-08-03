@@ -138,17 +138,13 @@ export async function createApp(root){
 
 <div class="overlay-root">
 
+<div class="player-name" id="player-name"></div>
     <div class="overlay-table">
         <div class="aim-table" id="overlay-aim-table">
         </div>
     </div>
 
-
     <div class="overlay-info">
-
-        <div class="player-name" id="player-name">
-        </div>
-
 
         <div class="result-line perfect">
             Perfect

@@ -351,17 +351,25 @@ body,
 
 
 
-.player-name {
+.player-name{
+
+    width:100%;
+
+    text-align:center;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
 
     font-size:1.4rem;
 
     font-weight:900;
 
-    margin-bottom:20px;
+    margin-bottom:12px;
 
 }
-
-
 
 .result-line {
 
