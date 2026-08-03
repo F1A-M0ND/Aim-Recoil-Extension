@@ -491,7 +491,7 @@ Strength
   }
 
   try {
-    await onFire(async ({shots, rpm}) => {
+    onFire(async ({ shots, rpm }) => {
       globalShots = []
       visibleShots = []
       firedShots = shots
