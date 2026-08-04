@@ -132,7 +132,9 @@ export async function createApp(root){
     <div class="overlay-header">
         <div class="player-name" id="player-name"></div>
     </div>
-
+    <div class="shot-count" id="shot-count">
+        Shots: 0
+    </div>
     <div class="overlay-body">
 
         <div class="overlay-table">
@@ -185,6 +187,9 @@ export async function createApp(root){
         async show(data){
 
             console.log("SHOW OVERLAY",data)
+
+            root.querySelector("#shot-count").textContent =
+                `Shots: ${data.shots?.length ?? 0}`
 
             table.innerHTML = tableMarkup(
                 data.shots ?? []

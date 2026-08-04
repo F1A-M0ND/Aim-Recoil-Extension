@@ -446,3 +446,33 @@ body,
     color:#f8889c;
 
 }
+
+.shot-count{
+
+    position:absolute;
+
+    top:10px;
+
+    right:10px;
+
+
+    padding:4px 8px;
+
+
+    background:rgba(15,24,35,.65);
+
+    border:1px solid rgba(255,255,255,.1);
+
+    border-radius:6px;
+
+
+    font-size:.8rem;
+
+    font-weight:800;
+
+    color:#edf4ff;
+
+
+    pointer-events:none;
+
+}
