@@ -68,15 +68,6 @@ body,
 
 }
 
-.aim-table.is-firing{
-
-    filter:brightness(0.45);
-
-    transition:
-            filter .2s ease;
-
-}
-
 .aim-table.fade-out{
 
     opacity:0;
@@ -97,9 +88,7 @@ body,
 .aim-table.is-firing::after{
 
     content:"";
-
     position:absolute;
-
     inset:0;
 
     background:rgba(0,0,0,.45);
@@ -107,11 +96,11 @@ body,
     z-index:7;
 
     pointer-events:none;
-
 }
 
 .aim-table.is-firing .marker-layer{
-    z-index:8;
+    position:relative;
+    z-index:9;
 }
 
 .aim-table.is-firing .shot-marker{
@@ -122,6 +111,10 @@ body,
             0 0 10px var(--marker-colour),
             0 0 25px var(--marker-colour);
 
+}
+
+.aim-table.is-firing .impact-layer{
+    z-index:10;
 }
 
 .aim-table {
@@ -363,11 +356,7 @@ body,
 
     box-shadow:
 
-            0 0 0 2px rgba(255,255,255,.9),
-
-            0 0 12px var(--marker-colour),
-
-            0 0 25px var(--marker-colour);
+            0 0 0 2px rgba(255,255,255,.9)
 
 }
 
