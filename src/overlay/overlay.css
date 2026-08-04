@@ -64,6 +64,9 @@ body,
 
 }
 
+.overlay-root.is-firing .aim-table{
+    filter:brightness(0.45);
+}
 
 .aim-table {
 

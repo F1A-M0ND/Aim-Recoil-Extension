@@ -1,6 +1,6 @@
 import "./overlay.css"
 
-import { createImpactLayer } from "../effect/impact.js"
+import {createImpactLayer, showImpact} from "../effect/impact.js"
 import { AIM_SIZE } from "../logic/calculator.js"
 
 const SHOT_COLORS = {
@@ -89,6 +89,15 @@ function tableMarkup(shots=[]){
 
 }
 
+function fireDelay(rpm){
+
+    if(Number(rpm) <= 0)
+        return Infinity
+
+    return 60000 / Number(rpm)
+
+}
+
 export async function createApp(root){
 
     root.innerHTML = `
@@ -140,6 +149,55 @@ export async function createApp(root){
 
 `
 
+    async function playOverlayAnimation(shots, rpm){
+
+        const visibleShots = []
+
+        if(rpm <= 0){
+
+            for(const shot of shots){
+
+                visibleShots.push(shot)
+
+            }
+
+            table.innerHTML = tableMarkup(visibleShots)
+
+            for(const shot of shots){
+
+                showImpact(
+                    shot.x,
+                    shot.y
+                )
+
+            }
+
+            return
+
+        }
+
+        const delayTime = fireDelay(rpm)
+
+        for(const shot of shots){
+
+            visibleShots.push(shot)
+
+            table.innerHTML = tableMarkup(
+                visibleShots
+            )
+
+            showImpact(
+                shot.x,
+                shot.y
+            )
+
+            await new Promise(
+                r=>setTimeout(r,delayTime)
+            )
+
+        }
+
+    }
 
     const table = root.querySelector("#overlay-aim-table")
 
@@ -157,10 +215,6 @@ export async function createApp(root){
 
             root.querySelector("#shot-count").textContent =
                 `Shots: ${data.shots?.length ?? 0}`
-
-            table.innerHTML = tableMarkup(
-                data.shots ?? []
-            )
 
             const summary = data.summary ?? {}
 
@@ -190,6 +244,12 @@ export async function createApp(root){
             root.querySelector("#miss-count").textContent =
                 summary.MISS ?? 0
 
+            table.innerHTML = tableMarkup([])
+
+            await playOverlayAnimation(
+                data.shots ?? [],
+                data.rpm
+            )
 
             console.log("Overlay Updated")
 
