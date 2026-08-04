@@ -62,10 +62,9 @@ body,
 /* TABLE AREA */
 
 .overlay-table {
-
+    position:relative;
     height:90vh;
-    aspect-ratio:1/1;
-
+    aspect-ratio:1 / 1;
 }
 
 .aim-table.is-firing{
@@ -496,13 +495,12 @@ body,
 
     position:absolute;
 
-    top:10px;
+    top:8px;
+    right:8px;
 
-    right:10px;
-
+    z-index:20;
 
     padding:4px 8px;
-
 
     background:rgba(15,24,35,.65);
 
@@ -510,14 +508,10 @@ body,
 
     border-radius:6px;
 
-
     font-size:.8rem;
-
     font-weight:800;
 
     color:#edf4ff;
 
-
     pointer-events:none;
-
 }
