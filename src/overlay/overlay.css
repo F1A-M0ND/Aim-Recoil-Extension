@@ -41,7 +41,11 @@ body,
 
     width:calc(90vh + 140px);
 
+    height:55px;
+
     margin-bottom:4px;
+
+    overflow:hidden;
 
 }
 
@@ -79,6 +83,44 @@ body,
 
     transition:
             opacity 1s ease;
+
+}
+
+.aim-table.is-firing .aim-zone{
+    filter:brightness(.55);
+}
+
+.aim-table.is-firing .aim-rings{
+    opacity:.5;
+}
+
+.aim-table.is-firing::after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    z-index:7;
+
+    pointer-events:none;
+
+}
+
+.aim-table.is-firing .marker-layer{
+    z-index:8;
+}
+
+.aim-table.is-firing .shot-marker{
+
+    filter:none;
+
+    box-shadow:
+            0 0 10px var(--marker-colour),
+            0 0 25px var(--marker-colour);
 
 }
 
@@ -323,7 +365,9 @@ body,
 
             0 0 0 2px rgba(255,255,255,.9),
 
-            0 0 8px var(--marker-colour);
+            0 0 12px var(--marker-colour),
+
+            0 0 25px var(--marker-colour);
 
 }
 
@@ -371,27 +415,22 @@ body,
 
 }
 
-
-
 .player-name{
+
+    height:40px;
 
     width:100%;
 
     text-align:center;
 
     white-space:nowrap;
-
     overflow:hidden;
-
     text-overflow:ellipsis;
 
     font-size:1.8rem;
-
     font-weight:900;
 
-    margin-bottom:14px;
-
-    line-height:1.2;
+    line-height:40px;
 
 }
 

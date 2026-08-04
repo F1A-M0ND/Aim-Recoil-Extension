@@ -201,7 +201,7 @@ export async function createApp(root){
             if(animation !== animationId){
                 return
             }
-            
+
             visibleShots.push(shot)
 
             const impactLayer = table.querySelector(".impact-layer")
@@ -248,6 +248,14 @@ export async function createApp(root){
 
             table.classList.add("is-firing")
 
+            const playerName =
+                root.querySelector("#player-name")
+
+            const name =
+                data.playerName ?? "Unknown"
+
+            playerName.textContent = name
+            playerName.title = name
 
             console.log("SHOW OVERLAY",data)
 
@@ -280,14 +288,6 @@ export async function createApp(root){
             const summary = data.summary ?? {}
 
 
-            const playerName =
-                root.querySelector("#player-name")
-
-            const name =
-                data.playerName ?? "Unknown"
-
-            playerName.textContent = name
-            playerName.title = name
 
 
             root.querySelector("#perfect-count").textContent =
@@ -314,16 +314,20 @@ export async function createApp(root){
 
 
             // fade หลังยิงเสร็จ
-            table.classList.add("fade-out")
-
-
             await new Promise(
                 r=>setTimeout(r,1000)
             )
 
 
-            table.classList.remove("fade-out")
+            table.classList.add("fade-out")
+
+            await new Promise(
+                r=>setTimeout(r,500)
+            )
+
+
             table.classList.remove("is-firing")
+            table.classList.remove("fade-out")
 
             console.log("Overlay Updated")
 
