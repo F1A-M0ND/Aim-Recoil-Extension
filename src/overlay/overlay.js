@@ -55,20 +55,17 @@ function cellType(x,y){
 
 function tableMarkup(shots=[]){
 
-    let cells=""
+    const cells = `
 
-    for(let y=1;y<=AIM_SIZE;y++){
+<div class="aim-zone miss"></div>
 
-        for(let x=1;x<=AIM_SIZE;x++){
+<div class="aim-zone bad"></div>
 
-            const type = cellType(x,y)
+<div class="aim-zone good"></div>
 
-            cells += `
-            <span class="aim-cell ${cssResult(type)}"></span>
-            `
-        }
+<div class="aim-zone perfect"></div>
 
-    }
+`
 
 
     const markers = shots.map(

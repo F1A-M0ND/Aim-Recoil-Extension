@@ -106,59 +106,64 @@ body,
 }
 
 
+.aim-zone{
 
-.aim-cell {
+    position:absolute;
 
-    display:block;
+    left:50%;
+    top:50%;
 
-    place-items:center;
-
-    font-size:.8rem;
-
-    font-weight:900;
-
-    width:100%;
-    height:100%;
+    transform:translate(-50%,-50%);
 
 }
 
 
+/* MISS */
 
-.aim-cell.miss {
+.aim-zone.miss{
 
-    color:#ffe0dd;
+    width:100%;
+    height:100%;
 
     background:#f1635c;
 
 }
 
 
-.aim-cell.bad {
+/* BAD */
 
-    color:#452414;
+.aim-zone.bad{
+
+    width:66%;
+    height:66%;
 
     background:#f89d59;
 
 }
 
 
-.aim-cell.good {
+/* GOOD */
 
-    color:#3e3516;
+.aim-zone.good{
+
+    width:33%;
+    height:33%;
 
     background:#f9d36b;
 
 }
 
 
-.aim-cell.perfect {
+/* PERFECT */
 
-    color:#544f17;
+.aim-zone.perfect{
+
+    width:16%;
+    height:16%;
 
     background:#fff896;
 
 }
-
 
 
 /* AIM RINGS */
