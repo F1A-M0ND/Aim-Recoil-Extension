@@ -244,6 +244,14 @@ export async function createApp(root){
 
             console.log("SHOW OVERLAY",data)
 
+            const impactLayer = table.querySelector(".impact-layer")
+
+            table.innerHTML = tableMarkup([])
+
+            if (impactLayer) {
+                table.appendChild(impactLayer)
+            }
+            
             root.querySelector("#shot-count").textContent =
                 `Shots: ${data.shots?.length ?? 0}`
 
@@ -275,13 +283,6 @@ export async function createApp(root){
             root.querySelector("#miss-count").textContent =
                 summary.MISS ?? 0
 
-            const impactLayer = table.querySelector(".impact-layer")
-
-            table.innerHTML = tableMarkup([])
-
-            if (impactLayer) {
-                table.appendChild(impactLayer)
-            }
 
             await playOverlayAnimation(
                 data.shots ?? [],
