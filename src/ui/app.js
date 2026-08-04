@@ -508,12 +508,6 @@ Strength
 
     firedShots = fireSeries(values())
 
-    table.classList.add("is-firing")
-
-    await new Promise(r => setTimeout(r, 1000))
-
-    const rpm = Number(values().rpm)
-
     try {
 
       const summary = firedShots.reduce(
@@ -535,6 +529,14 @@ Strength
       console.log("sync error:", error)
 
     }
+
+    table.classList.add("is-firing")
+
+    await new Promise(r => setTimeout(r, 1000))
+
+    const rpm = Number(values().rpm)
+
+
 
     await playFireAnimation(
         firedShots,

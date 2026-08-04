@@ -251,7 +251,7 @@ export async function createApp(root){
             if (impactLayer) {
                 table.appendChild(impactLayer)
             }
-            
+
             root.querySelector("#shot-count").textContent =
                 `Shots: ${data.shots?.length ?? 0}`
 
