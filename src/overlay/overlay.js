@@ -100,6 +100,8 @@ function fireDelay(rpm){
 
 export async function createApp(root){
 
+    let animationId = 0
+
     root.innerHTML = `
 
 <div class="overlay-root">
@@ -149,7 +151,11 @@ export async function createApp(root){
 
 `
 
-    async function playOverlayAnimation(shots, rpm){
+    async function playOverlayAnimation(
+        shots,
+        rpm,
+        animation
+    ){
 
         const visibleShots = []
 
@@ -161,9 +167,21 @@ export async function createApp(root){
 
             }
 
-            table.innerHTML = tableMarkup(visibleShots)
+            const impactLayer = table.querySelector(".impact-layer")
+
+            table.innerHTML = tableMarkup(
+                visibleShots
+            )
+
+            if(impactLayer){
+                table.appendChild(impactLayer)
+            }
 
             for(const shot of shots){
+
+                if(animation !== animationId){
+                    return
+                }
 
                 showImpact(
                     shot.x,
@@ -201,10 +219,12 @@ export async function createApp(root){
 
     const table = root.querySelector("#overlay-aim-table")
 
+    animationId++
+    const myAnimation = animationId
+
     table.innerHTML = tableMarkup([])
 
     createImpactLayer(table)
-
 
     return {
 
@@ -248,7 +268,8 @@ export async function createApp(root){
 
             await playOverlayAnimation(
                 data.shots ?? [],
-                data.rpm
+                data.rpm,
+                myAnimation
             )
 
             console.log("Overlay Updated")
