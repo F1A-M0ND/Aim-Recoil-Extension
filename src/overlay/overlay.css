@@ -417,6 +417,8 @@ body,
 
 .player-name{
 
+    transform:translateY(-20px);
+
     height:40px;
 
     width:100%;
