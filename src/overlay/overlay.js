@@ -198,6 +198,10 @@ export async function createApp(root){
 
         for(const shot of shots){
 
+            if(animation !== animationId){
+                return
+            }
+            
             visibleShots.push(shot)
 
             const impactLayer = table.querySelector(".impact-layer")
@@ -242,11 +246,29 @@ export async function createApp(root){
             animationId++
             const myAnimation = animationId
 
+            table.classList.add("is-firing")
+
+
             console.log("SHOW OVERLAY",data)
 
-            const impactLayer = table.querySelector(".impact-layer")
 
-            table.innerHTML = tableMarkup([])
+            const impactLayer =
+                table.querySelector(".impact-layer")
+
+
+            table.innerHTML =
+                tableMarkup([])
+
+
+            if(impactLayer){
+                table.appendChild(impactLayer)
+            }
+
+
+            // รอมืด 1 วิ ก่อนยิงจริง
+            await new Promise(
+                r=>setTimeout(r,1000)
+            )
 
             if (impactLayer) {
                 table.appendChild(impactLayer)
@@ -289,6 +311,19 @@ export async function createApp(root){
                 data.rpm,
                 myAnimation
             )
+
+
+            // fade หลังยิงเสร็จ
+            table.classList.add("fade-out")
+
+
+            await new Promise(
+                r=>setTimeout(r,1000)
+            )
+
+
+            table.classList.remove("fade-out")
+            table.classList.remove("is-firing")
 
             console.log("Overlay Updated")
 

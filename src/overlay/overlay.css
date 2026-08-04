@@ -64,8 +64,22 @@ body,
 
 }
 
-.overlay-root.is-firing .aim-table{
+.aim-table.is-firing{
+
     filter:brightness(0.45);
+
+    transition:
+            filter .2s ease;
+
+}
+
+.aim-table.fade-out{
+
+    opacity:0;
+
+    transition:
+            opacity 1s ease;
+
 }
 
 .aim-table {
