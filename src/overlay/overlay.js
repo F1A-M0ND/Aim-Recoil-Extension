@@ -200,9 +200,19 @@ export async function createApp(root){
 
             visibleShots.push(shot)
 
+            const impactLayer = table.querySelector(".impact-layer")
+
             table.innerHTML = tableMarkup(
                 visibleShots
             )
+
+            if (impactLayer) {
+                table.appendChild(impactLayer)
+            }
+
+            if(animation !== animationId){
+                return
+            }
 
             showImpact(
                 shot.x,
@@ -219,8 +229,7 @@ export async function createApp(root){
 
     const table = root.querySelector("#overlay-aim-table")
 
-    animationId++
-    const myAnimation = animationId
+
 
     table.innerHTML = tableMarkup([])
 
@@ -228,8 +237,10 @@ export async function createApp(root){
 
     return {
 
-
         async show(data){
+
+            animationId++
+            const myAnimation = animationId
 
             console.log("SHOW OVERLAY",data)
 
