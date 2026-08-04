@@ -490,24 +490,6 @@ Strength
     }
   }
 
-  try {
-    onFire(async ({ shots, rpm, summary, playerName }) => {
-      globalShots = []
-      visibleShots = []
-      firedShots = shots
-
-      table.classList.add("is-firing")
-
-      await playFireAnimation(shots, rpm, true)
-
-      await new Promise(r => setTimeout(r, 1000))
-
-      table.classList.remove("is-firing")
-    })
-  } catch (err) {
-    console.error("onFire init failed:", err)
-  }
-
   form.addEventListener('submit', async (event) => {
 
     event.preventDefault()
@@ -532,12 +514,6 @@ Strength
 
     const rpm = Number(values().rpm)
 
-    await playFireAnimation(
-        firedShots,
-        rpm,
-        false
-    )
-
     try {
 
       const summary = firedShots.reduce(
@@ -559,6 +535,12 @@ Strength
       console.log("sync error:", error)
 
     }
+
+    await playFireAnimation(
+        firedShots,
+        rpm,
+        false
+    )
 
     await new Promise(r => setTimeout(r,1000))
 
