@@ -55,22 +55,12 @@ function cellType(x,y){
 
 function tableMarkup(shots=[]){
 
-    let cells=""
-
-    for(let y=1;y<=AIM_SIZE;y++){
-
-        for(let x=1;x<=AIM_SIZE;x++){
-
-            const type = cellType(x,y)
-
-            cells += `
-            <span class="aim-cell ${cssResult(type)}"></span>
-            `
-        }
-
-    }
-
-
+    const cells = `
+    <div class="zone miss"></div>
+    <div class="zone bad"></div>
+    <div class="zone good"></div>
+    <div class="zone perfect"></div>
+`
     const markers = shots.map(
         ({x,y,number})=>{
 
@@ -131,9 +121,10 @@ export async function createApp(root){
 
     <div class="overlay-header">
         <div class="player-name" id="player-name"></div>
-    </div>
-    <div class="shot-count" id="shot-count">
-        Shots: 0
+
+        <div class="shot-count" id="shot-count">
+            Shots: 0
+        </div>
     </div>
     <div class="overlay-body">
 
