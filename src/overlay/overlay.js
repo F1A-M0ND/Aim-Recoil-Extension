@@ -3,10 +3,6 @@ import "./overlay.css"
 import { createImpactLayer } from "../effect/impact.js"
 import { AIM_SIZE } from "../logic/calculator.js"
 
-const cssResult = (result)=>
-    result.toLowerCase().replace(' ','-')
-
-
 const SHOT_COLORS = {
     0:"#ff6b6b",
     1:"#4dabf7",
@@ -23,33 +19,6 @@ const SHOT_COLORS = {
 function getShotColor(number){
 
     return SHOT_COLORS[number % 10]
-
-}
-
-function cellType(x,y){
-
-    if(
-        (y===6 || y===7) &&
-        (x===6 || x===7)
-    )
-        return "PERFECT"
-
-
-    if(
-        y>=5 && y<=8 &&
-        x>=5 && x<=8
-    )
-        return "GOOD"
-
-
-    if(
-        y>=3 && y<=10 &&
-        x>=3 && x<=10
-    )
-        return "BAD"
-
-
-    return "MISS"
 
 }
 

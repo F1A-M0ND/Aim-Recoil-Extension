@@ -83,28 +83,7 @@ body,
 }
 
 
-/* GRID */
-
-.aim-grid {
-
-    position:absolute;
-
-    inset:0;
-
-    display:grid;
-
-    grid-template-columns:repeat(12,1fr);
-    grid-template-rows:repeat(12,1fr);
-
-    overflow:hidden;
-
-    border-radius:8px;
-
-
-    gap:0;
-
-}
-
+/* ZONE */
 
 .aim-zone{
 
