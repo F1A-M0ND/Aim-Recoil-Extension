@@ -118,11 +118,21 @@ export async function createApp(root){
 
     let animationId = 0
     let autoCloseTimer = null
-
+    let countdownTimer = null
+    let autoCloseCancelled = false
 
     root.innerHTML = `
 
+    <div class="overlay-controls">
+
+    <span id="autoclose-info" class="autoclose-info">
+        <a href="#" id="cancel-autoclose">Cancel</a>
+        close in <span id="autoclose-count">5</span>s
+    </span>
+
     <button id="close-overlay" class="close-overlay">✕</button>
+
+</div>
     
 <div class="overlay-root">
 
@@ -179,10 +189,14 @@ export async function createApp(root){
 
         if(autoCloseTimer){
 
-            clearTimeout(autoCloseTimer);
-            autoCloseTimer = null;
+            clearTimeout(autoCloseTimer)
+            autoCloseTimer = null
 
         }
+
+        clearInterval(countdownTimer)
+
+        autoCloseCancelled = false
 
         table.classList.remove("is-firing");
         table.classList.remove("fade-out");
@@ -361,6 +375,21 @@ export async function createApp(root){
             closeOverlay
         )
 
+    root.querySelector("#cancel-autoclose")
+        .addEventListener("click",(e)=>{
+
+            e.preventDefault()
+
+            autoCloseCancelled = true
+
+            clearTimeout(autoCloseTimer)
+            clearInterval(countdownTimer)
+
+            root.querySelector("#autoclose-info").textContent =
+                "Auto close cancelled"
+
+        })
+
     return {
 
         async show(data){
@@ -368,6 +397,12 @@ export async function createApp(root){
             animationId++
             const myAnimation = animationId
 
+            autoCloseCancelled = false
+
+            const counter =
+                root.querySelector("#autoclose-count")
+
+            counter.textContent = "5"
             if(autoCloseTimer){
 
                 clearTimeout(autoCloseTimer)
@@ -376,9 +411,13 @@ export async function createApp(root){
 
             autoCloseTimer = setTimeout(()=>{
 
-                closeOverlay();
+                if(!autoCloseCancelled){
 
-            },5000);
+                    closeOverlay()
+
+                }
+
+            },5000)
 
             table.classList.add("is-firing")
 
@@ -444,6 +483,33 @@ export async function createApp(root){
             // ยิงเสร็จ
 
             table.classList.add("fade-out")
+
+            let remain = 5
+
+            clearInterval(countdownTimer)
+
+            countdownTimer = setInterval(()=>{
+
+                if(autoCloseCancelled){
+
+                    clearInterval(countdownTimer)
+                    return
+
+                }
+
+                remain--
+
+                if(remain <= 0){
+
+                    remain = 0
+
+                    clearInterval(countdownTimer)
+
+                }
+
+                counter.textContent = remain
+
+            },1000)
 
             // เริ่ม fade ทันที
             // fade ต้องใช้เวลา 1000ms
