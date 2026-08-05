@@ -74,7 +74,7 @@ body,
 
 }
 
-.aim-table.fade-out::after{
+.aim-table.is-firing.fade-out::after{
 
     opacity:0;
 
