@@ -16,6 +16,19 @@ const SHOT_COLORS = {
     9:"#adb5bd"
 }
 
+const REVEAL_TIMING = {
+
+    perfect:300,
+    good:600,
+    bad:900,
+    miss:1200,
+
+    shotCount:1500,
+
+    countDuration:300
+
+}
+
 function getShotColor(number){
 
     return SHOT_COLORS[number % 10]
@@ -122,25 +135,25 @@ export async function createApp(root){
 
     <div class="overlay-info">
 
-        <div class="result-line perfect">
+        <div class="result-line perfect hidden-result">
             Perfect
             <span id="perfect-count">0</span>
         </div>
 
 
-        <div class="result-line good">
+        <div class="result-line good hidden-result">
             Good
             <span id="good-count">0</span>
         </div>
 
 
-        <div class="result-line bad">
+        <div class="result-line bad hidden-result">
             Bad
             <span id="bad-count">0</span>
         </div>
 
 
-        <div class="result-line miss">
+        <div class="result-line miss hidden-result">
             Miss
             <span id="miss-count">0</span>
         </div>
@@ -233,7 +246,83 @@ export async function createApp(root){
 
     const table = root.querySelector("#overlay-aim-table")
 
+    function sleep(ms){
 
+        return new Promise(
+            r=>setTimeout(r,ms)
+        )
+
+    }
+
+
+    function revealResult(selector,value,delay,animation){
+
+        setTimeout(()=>{
+
+            if(animation !== animationId)
+                return
+
+
+            const box =
+                root.querySelector(selector)
+
+
+            box.classList.add(
+                "show-result"
+            )
+
+
+            box.querySelector("span").textContent =
+                value
+
+
+        },delay)
+
+    }
+
+    function animateShotCount(target){
+
+        const el =
+            root.querySelector("#shot-count")
+
+
+        const start =
+            performance.now()
+
+
+        const duration =
+            REVEAL_TIMING.countDuration
+
+
+        function update(now){
+
+            const progress =
+                Math.min(
+                    (now-start)/duration,
+                    1
+                )
+
+
+            const value =
+                Math.floor(
+                    target * progress
+                )
+
+
+            el.textContent =
+                `Shots: ${value}`
+
+
+            if(progress < 1){
+                requestAnimationFrame(update)
+            }
+
+        }
+
+
+        requestAnimationFrame(update)
+
+    }
 
     table.innerHTML = tableMarkup([])
 
@@ -267,11 +356,19 @@ export async function createApp(root){
             table.innerHTML =
                 tableMarkup([])
 
+            root.querySelectorAll(
+                ".result-line"
+            )
+                .forEach(
+                    e=>e.classList.remove("show-result")
+                )
 
             if(impactLayer){
                 table.appendChild(impactLayer)
             }
 
+            root.querySelector("#shot-count").textContent =
+                "Shots: 0"
 
             // รอมืด 1 วิ ก่อนยิงจริง
             await new Promise(
@@ -282,29 +379,20 @@ export async function createApp(root){
                 table.appendChild(impactLayer)
             }
 
-            root.querySelector("#shot-count").textContent =
-                `Shots: ${data.shots?.length ?? 0}`
+
 
             const summary = data.summary ?? {}
 
+            const infoValues = {
+                perfect: summary.PERFECT ?? 0,
+                good: summary.GOOD ?? 0,
+                bad: summary.BAD ?? 0,
+                miss: summary.MISS ?? 0
+            }
 
-
-
-            root.querySelector("#perfect-count").textContent =
-                summary.PERFECT ?? 0
-
-
-            root.querySelector("#good-count").textContent =
-                summary.GOOD ?? 0
-
-
-            root.querySelector("#bad-count").textContent =
-                summary.BAD ?? 0
-
-
-            root.querySelector("#miss-count").textContent =
-                summary.MISS ?? 0
-
+            for(const el of root.querySelectorAll(".result-line")){
+                el.style.opacity = "0"
+            }
 
             await playOverlayAnimation(
                 data.shots ?? [],
@@ -312,23 +400,59 @@ export async function createApp(root){
                 myAnimation
             )
 
-
-            // fade หลังยิงเสร็จ
-            await new Promise(
-                r=>setTimeout(r,1000)
-            )
-
+            // ยิงเสร็จ
 
             table.classList.add("fade-out")
 
-            await new Promise(
-                r=>setTimeout(r,500)
+            // เริ่ม fade ทันที
+            // fade ต้องใช้เวลา 1000ms
+
+            setTimeout(()=>{
+
+                table.classList.remove("fade-out")
+
+            },1000)
+
+
+            // result timeline แยก
+            revealResult(
+                ".result-line.perfect",
+                infoValues.perfect,
+                REVEAL_TIMING.perfect,
+                myAnimation
+            )
+
+            revealResult(
+                ".result-line.good",
+                infoValues.good,
+                REVEAL_TIMING.good,
+                myAnimation
+            )
+
+            revealResult(
+                ".result-line.bad",
+                infoValues.bad,
+                REVEAL_TIMING.bad,
+                myAnimation
+            )
+
+            revealResult(
+                ".result-line.miss",
+                infoValues.miss,
+                REVEAL_TIMING.miss,
+                myAnimation
             )
 
 
-            table.classList.remove("is-firing")
-            table.classList.remove("fade-out")
+            setTimeout(()=>{
 
+                animateShotCount(
+                    data.shots?.length ?? 0
+                )
+
+            },REVEAL_TIMING.shotCount)
+
+            table.classList.remove("is-firing")
             console.log("Overlay Updated")
 
         },

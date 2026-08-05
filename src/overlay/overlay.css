@@ -521,3 +521,33 @@ body,
 
     pointer-events:none;
 }
+
+.hidden-result{
+
+    opacity:0;
+
+    transform:translateY(8px);
+
+}
+
+
+.result-line.show-result{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+    transition:
+            opacity .15s ease,
+            transform .15s ease;
+
+}
+
+.result-line{
+
+    opacity:0;
+
+    transition:
+            opacity .15s ease;
+
+}
