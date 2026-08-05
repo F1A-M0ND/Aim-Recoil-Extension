@@ -121,16 +121,17 @@ export async function createApp(root){
 
 <div class="overlay-root">
 
+        <button id="close-overlay" class="close-overlay">
+        ✕
+        </button>
+        
     <div class="overlay-header">
+        
         <div class="player-name" id="player-name"></div>
 
         <div class="shot-count" id="shot-count">
             Shots: 0
         </div>
-        
-        <button id="close-overlay" class="close-overlay">
-        ✕
-        </button>
 
     </div>
     <div class="overlay-body">
@@ -173,14 +174,15 @@ export async function createApp(root){
 
     function closeOverlay(){
 
-        if(autoCloseTimer){
+        animationId++;
 
-            clearTimeout(autoCloseTimer)
-            autoCloseTimer = null
+        clearTimeout(autoCloseTimer);
+        autoCloseTimer = null;
 
-        }
+        table.classList.remove("is-firing");
+        table.classList.remove("fade-out");
 
-        root.style.display = "none"
+        root.style.display = "none";
 
     }
 
