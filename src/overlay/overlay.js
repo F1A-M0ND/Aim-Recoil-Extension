@@ -1,4 +1,5 @@
 import "./overlay.css"
+import { OBR } from "../obr/client.js"
 
 import {createImpactLayer, showImpact} from "../effect/impact.js"
 import { AIM_SIZE } from "../logic/calculator.js"
@@ -28,6 +29,8 @@ const REVEAL_TIMING = {
     countDuration:300
 
 }
+
+const POPOVER_ID = "com.aim-recoil-extension.popover"
 
 function getShotColor(number){
 
@@ -172,17 +175,29 @@ export async function createApp(root){
 
 `
 
-    function closeOverlay(){
+    async function closeOverlay(){
 
         animationId++;
 
-        clearTimeout(autoCloseTimer);
-        autoCloseTimer = null;
+        if(autoCloseTimer){
+
+            clearTimeout(autoCloseTimer);
+            autoCloseTimer = null;
+
+        }
 
         table.classList.remove("is-firing");
         table.classList.remove("fade-out");
 
-        root.style.display = "none";
+        await OBR.popover.setWidth(
+            POPOVER_ID,
+            0
+        );
+
+        await OBR.popover.setHeight(
+            POPOVER_ID,
+            0
+        );
 
     }
 
@@ -354,7 +369,6 @@ export async function createApp(root){
 
             animationId++
             const myAnimation = animationId
-            root.style.display = ""
 
             if(autoCloseTimer){
 
@@ -362,13 +376,11 @@ export async function createApp(root){
 
             }
 
-            autoCloseTimer = setTimeout(
+            autoCloseTimer = setTimeout(()=>{
 
-                closeOverlay,
+                closeOverlay();
 
-                5000
-
-            )
+            },5000);
 
             table.classList.add("is-firing")
 
