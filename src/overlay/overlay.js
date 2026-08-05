@@ -124,9 +124,9 @@ export async function createApp(root){
 
 <div class="overlay-root">
 
-        <button id="close-overlay" class="close-overlay">
+    <button id="close-overlay" class="close-overlay">
         ✕
-        </button>
+    </button>
         
     <div class="overlay-header">
         
