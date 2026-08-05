@@ -554,35 +554,29 @@ body,
 }
 
 .close-overlay{
-
     position:absolute;
 
     top:12px;
     right:12px;
 
-    width:34px;
-    height:34px;
+    width:32px;
+    height:32px;
 
     display:grid;
     place-items:center;
 
     border:none;
-    border-radius:50%;
+    border-radius:8px;
 
     background:rgba(20,30,45,.85);
-    color:white;
+    color:#fff;
 
     font-size:18px;
-    font-weight:700;
+    font-weight:900;
 
     cursor:pointer;
 
     z-index:9999;
-
-    transition:
-            background .15s ease,
-            transform .15s ease;
-
 }
 
 .close-overlay:hover{

@@ -122,12 +122,10 @@ export async function createApp(root){
 
     root.innerHTML = `
 
+    <button id="close-overlay" class="close-overlay">✕</button>
+    
 <div class="overlay-root">
 
-    <button id="close-overlay" class="close-overlay">
-        ✕
-    </button>
-        
     <div class="overlay-header">
         
         <div class="player-name" id="player-name"></div>
