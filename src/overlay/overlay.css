@@ -107,8 +107,6 @@ body,
 
     pointer-events:none;
 
-    transition:opacity .2s ease;
-
 }
 
 .aim-table.is-firing::after{
