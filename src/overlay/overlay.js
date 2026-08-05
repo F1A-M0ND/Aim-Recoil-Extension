@@ -114,6 +114,8 @@ function fireDelay(rpm){
 export async function createApp(root){
 
     let animationId = 0
+    let autoCloseTimer = null
+
 
     root.innerHTML = `
 
@@ -125,6 +127,11 @@ export async function createApp(root){
         <div class="shot-count" id="shot-count">
             Shots: 0
         </div>
+        
+        <button id="close-overlay" class="close-overlay">
+        ✕
+        </button>
+
     </div>
     <div class="overlay-body">
 
@@ -163,6 +170,19 @@ export async function createApp(root){
 </div>
 
 `
+
+    function closeOverlay(){
+
+        if(autoCloseTimer){
+
+            clearTimeout(autoCloseTimer)
+            autoCloseTimer = null
+
+        }
+
+        root.style.display = "none"
+
+    }
 
     async function playOverlayAnimation(
         shots,
@@ -246,14 +266,6 @@ export async function createApp(root){
 
     const table = root.querySelector("#overlay-aim-table")
 
-    function sleep(ms){
-
-        return new Promise(
-            r=>setTimeout(r,ms)
-        )
-
-    }
-
 
     function revealResult(selector,value,delay,animation){
 
@@ -328,12 +340,33 @@ export async function createApp(root){
 
     createImpactLayer(table)
 
+    root.querySelector("#close-overlay")
+        .addEventListener(
+            "click",
+            closeOverlay
+        )
+
     return {
 
         async show(data){
 
             animationId++
             const myAnimation = animationId
+            root.style.display = ""
+
+            if(autoCloseTimer){
+
+                clearTimeout(autoCloseTimer)
+
+            }
+
+            autoCloseTimer = setTimeout(
+
+                closeOverlay,
+
+                5000
+
+            )
 
             table.classList.add("is-firing")
 
@@ -454,14 +487,12 @@ export async function createApp(root){
 
             },1000)
 
-
             console.log("Overlay Updated")
 
         },
 
-
         hide(){
-
+            closeOverlay()
             root.querySelector("#player-name").textContent=""
 
         }
