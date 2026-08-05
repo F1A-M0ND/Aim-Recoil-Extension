@@ -390,10 +390,6 @@ export async function createApp(root){
                 miss: summary.MISS ?? 0
             }
 
-            for(const el of root.querySelectorAll(".result-line")){
-                el.style.opacity = "0"
-            }
-
             await playOverlayAnimation(
                 data.shots ?? [],
                 data.rpm,
@@ -452,7 +448,13 @@ export async function createApp(root){
 
             },REVEAL_TIMING.shotCount)
 
-            table.classList.remove("is-firing")
+            setTimeout(()=>{
+
+                table.classList.remove("is-firing")
+
+            },1000)
+
+
             console.log("Overlay Updated")
 
         },
