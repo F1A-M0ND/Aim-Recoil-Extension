@@ -74,7 +74,7 @@ body,
 
 }
 
-.aim-table.fade-out{
+.aim-table.fade-out::after{
 
     opacity:0;
 
@@ -91,7 +91,7 @@ body,
     opacity:.5;
 }
 
-.aim-table.is-firing::after{
+.aim-table::after{
 
     content:"";
 
@@ -101,9 +101,19 @@ body,
 
     background:rgba(0,0,0,.45);
 
+    opacity:0;
+
     z-index:7;
 
     pointer-events:none;
+
+    transition:opacity .2s ease;
+
+}
+
+.aim-table.is-firing::after{
+
+    opacity:1;
 
 }
 
