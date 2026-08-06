@@ -17,9 +17,10 @@ OBR.onReady(async()=>{
 
     await onFire(async (data) => {
 
-        await showPopover()
-
-        await overlay.show(data)
+        await Promise.all([
+            showPopover(),
+            overlay.show(data)
+        ])
 
     })
 

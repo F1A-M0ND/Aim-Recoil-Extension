@@ -503,11 +503,11 @@ body,
     position:absolute;
 
     top:8px;
-    right:8px;
+    right:2px;
 
     z-index:20;
 
-    padding:4px 8px;
+    padding:3px 7px;
 
     background:rgba(15,24,35,.65);
 

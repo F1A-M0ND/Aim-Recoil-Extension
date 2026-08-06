@@ -1,5 +1,9 @@
 import "./overlay.css"
-import { OBR } from "../obr/client.js"
+
+import {
+    showPopover,
+    hidePopover
+} from "../obr/popover.js"
 
 import {createImpactLayer, showImpact} from "../effect/impact.js"
 import { AIM_SIZE } from "../logic/calculator.js"
@@ -30,7 +34,6 @@ const REVEAL_TIMING = {
 
 }
 
-const POPOVER_ID = "com.aim-recoil-extension.popover"
 
 function getShotColor(number){
 
@@ -200,16 +203,7 @@ export async function createApp(root){
 
         table.classList.remove("is-firing");
         table.classList.remove("fade-out");
-
-        await OBR.popover.setWidth(
-            POPOVER_ID,
-            0
-        );
-
-        await OBR.popover.setHeight(
-            POPOVER_ID,
-            0
-        );
+        await hidePopover();
 
     }
 
