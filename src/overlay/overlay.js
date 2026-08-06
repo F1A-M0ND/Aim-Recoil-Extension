@@ -418,7 +418,7 @@ export async function createApp(root){
                 root.querySelector("#autoclose-count")
 
             counter.textContent = "5"
-            
+
             clearTimeout(autoCloseTimer)
             clearInterval(countdownTimer)
 
