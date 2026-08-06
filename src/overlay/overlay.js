@@ -379,8 +379,7 @@ export async function createApp(root){
             clearTimeout(autoCloseTimer)
             clearInterval(countdownTimer)
 
-            root.querySelector("#autoclose-info").textContent =
-                "Auto close cancelled"
+            root.querySelector("#autoclose-info").innerHTML = `Auto close cancelled`
 
         })
 
@@ -393,15 +392,38 @@ export async function createApp(root){
 
             autoCloseCancelled = false
 
+            const info =
+                root.querySelector("#autoclose-info")
+
+            info.innerHTML = `
+    <a href="#" id="cancel-autoclose">Cancel</a>
+    close in <span id="autoclose-count">5</span>s
+`
+            root.querySelector("#cancel-autoclose")
+                .addEventListener("click",(e)=>{
+
+                    e.preventDefault()
+
+                    autoCloseCancelled = true
+
+                    clearTimeout(autoCloseTimer)
+                    clearInterval(countdownTimer)
+
+                    root.querySelector("#autoclose-info").innerHTML =
+                        "Auto close cancelled"
+
+                })
+
             const counter =
                 root.querySelector("#autoclose-count")
 
             counter.textContent = "5"
-            if(autoCloseTimer){
+            
+            clearTimeout(autoCloseTimer)
+            clearInterval(countdownTimer)
 
-                clearTimeout(autoCloseTimer)
-
-            }
+            autoCloseTimer = null
+            countdownTimer = null
 
             autoCloseTimer = setTimeout(()=>{
 
