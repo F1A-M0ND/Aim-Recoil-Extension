@@ -417,7 +417,7 @@ export async function createApp(root){
 
                 }
 
-            },5000)
+            },7000)
 
             table.classList.add("is-firing")
 
