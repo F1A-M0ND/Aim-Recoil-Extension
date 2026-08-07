@@ -1,4 +1,5 @@
 import "./overlay/overlay.css"
+import { createOverlayQueue } from "./queue/overlayQueue.js"
 
 import { OBR } from "./obr/client.js"
 import { createApp } from "./overlay/overlay.js"
@@ -15,12 +16,11 @@ OBR.onReady(async()=>{
     console.log("Overlay Visible")
 
 
-    await onFire(async (data) => {
+    const queue = createOverlayQueue(overlay)
 
-        await Promise.all([
-            showPopover(),
-            overlay.show(data)
-        ])
+    await onFire((data)=>{
+
+        queue.enqueue(data)
 
     })
 

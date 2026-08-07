@@ -120,6 +120,7 @@ function fireDelay(rpm){
 export async function createApp(root){
 
     let animationId = 0
+    let closeResolver = null
     let autoCloseTimer = null
     let countdownTimer = null
     let autoCloseCancelled = false
@@ -205,6 +206,13 @@ export async function createApp(root){
         table.classList.remove("fade-out");
         await hidePopover();
 
+        if(closeResolver){
+
+            closeResolver()
+
+            closeResolver = null
+
+        }
     }
 
     async function playOverlayAnimation(
@@ -582,6 +590,16 @@ export async function createApp(root){
             },1000)
 
             console.log("Overlay Updated")
+
+        },
+
+        waitUntilClosed(){
+
+            return new Promise(resolve=>{
+
+                closeResolver = resolve
+
+            })
 
         },
 
