@@ -20,13 +20,15 @@ export function createOverlayQueue(overlay){
 
         running = true
 
+        // เตรียม Promise รอการปิดก่อน
+        const closed = overlay.waitUntilClosed()
+
         await showPopover()
 
         await overlay.show(item)
 
-        await overlay.waitUntilClosed()
-
-        await hidePopover()
+        // รอจน overlay ปิดจริง
+        await closed
 
         running = false
 
