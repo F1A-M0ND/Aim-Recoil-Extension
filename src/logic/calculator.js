@@ -140,7 +140,12 @@ export function fireSeries(input, random = Math.random) {
       : Infinity
 
 
-  return Array.from({length: count}, (_, index)=>{
+  const shotgun = input.shotgun === true || input.shotgun === 'on'
+  const radius = decimal(input.shotgunRadius)
+  const subBulletCount = Math.max(1, integer(input.shotgunSubBullet, 1))
+  const shots = []
+
+  Array.from({length: count}, (_, index)=>{
 
     // ถ้าห่างเกิน 2 วิ ให้คืนศูนย์
     if(index > 0 && interval >= 2000){
@@ -161,10 +166,20 @@ export function fireSeries(input, random = Math.random) {
     )
 
 
-    return {
-      number:index + 1,
-      ...shot
+    if (!shotgun) {
+      shots.push({ number: index + 1, round: index + 1, ...shot })
+      return
+    }
+
+    for (let subBullet = 0; subBullet < subBulletCount; subBullet += 1) {
+      const angle = random() * Math.PI * 2
+      const distance = Math.sqrt(random()) * radius
+      const x = Math.min(AIM_SIZE, Math.max(1, shot.x + Math.cos(angle) * distance))
+      const y = Math.min(AIM_SIZE, Math.max(1, shot.y + Math.sin(angle) * distance))
+      shots.push({ number: shots.length + 1, round: index + 1, subBullet: subBullet + 1, x, y, result: getAimResult(x, y) })
     }
 
   })
+
+  return shots
 }

@@ -8,9 +8,17 @@ import { showPopover } from "./obr/popover.js"
 
 const root = document.querySelector('#app')
 
+const setAudioStatus = async (unlocked) => {
+    if (!isObrAvailable()) return
+
+    await OBR.action.setBadgeText(unlocked ? "🔊" : "🔇")
+    await OBR.action.setTitle(`Aim & Recoil System — Audio ${unlocked ? "enabled" : "locked"}`)
+}
+
 const start = () =>
     createApp(root, {
-        isConnected: isObrAvailable()
+        isConnected: isObrAvailable(),
+        onAudioStatus: setAudioStatus
     })
 
 if (isObrAvailable()) {

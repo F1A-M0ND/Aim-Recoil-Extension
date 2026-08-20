@@ -45,7 +45,7 @@ export async function sendFire(payload){
 }
 
 
-export async function onFire(callback){
+export async function onFire(callback, { includeOwn = false } = {}){
 
     await waitOBR()
 
@@ -68,11 +68,13 @@ export async function onFire(callback){
             const myId = await OBR.player.getId()
 
 
-            if(event.data.playerId === myId)
+            const isLocal = event.data.playerId === myId
+
+            if(isLocal && !includeOwn)
                 return
 
 
-            await callback(event.data)
+            await callback(event.data, { isLocal })
 
         }
     )

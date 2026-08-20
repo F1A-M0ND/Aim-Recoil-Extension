@@ -117,6 +117,16 @@ function fireDelay(rpm){
 
 }
 
+function shotGroups(shots){
+    return shots.reduce((groups, shot) => {
+        const round = shot.round ?? shot.number
+        const current = groups[groups.length - 1]
+        if(!current || current.round !== round) groups.push({ round, shots: [shot] })
+        else current.shots.push(shot)
+        return groups
+    }, [])
+}
+
 export async function createApp(root){
 
     let animationId = 0
@@ -260,13 +270,13 @@ export async function createApp(root){
 
         const delayTime = fireDelay(rpm)
 
-        for(const shot of shots){
+        for(const group of shotGroups(shots)){
 
             if(animation !== animationId){
                 return
             }
 
-            visibleShots.push(shot)
+            visibleShots.push(...group.shots)
 
             const impactLayer = table.querySelector(".impact-layer")
 
@@ -282,10 +292,9 @@ export async function createApp(root){
                 return
             }
 
-            showImpact(
-                shot.x,
-                shot.y
-            )
+            for(const shot of group.shots){
+                showImpact(shot.x, shot.y)
+            }
 
             await new Promise(
                 r=>setTimeout(r,delayTime)
@@ -578,7 +587,7 @@ export async function createApp(root){
             setTimeout(()=>{
 
                 animateShotCount(
-                    data.shots?.length ?? 0
+                    data.shotCount ?? data.shots?.length ?? 0
                 )
 
             },REVEAL_TIMING.shotCount)
