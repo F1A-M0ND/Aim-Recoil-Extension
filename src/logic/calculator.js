@@ -11,8 +11,9 @@ export function getAimResult(x, y) {
   return 'MISS'
 }
 
-function applyDebuff(value, amount) {
+function applyDebuff(value, amount, random = Math.random) {
   // A debuff always moves a die away from the true centre of the table.
+  if (value === 6.5) return random() < 0.5 ? value - amount : value + amount
   return value <= 6.5 ? value - amount : value + amount
 }
 
@@ -23,14 +24,14 @@ function applyBuff(value, amount) {
   return value
 }
 
-function applyAccuracy(value, buff, debuff, mastery, CRc) {
+function applyAccuracy(value, buff, debuff, mastery, CRc, random) {
   // Accuracy Buff + Weapon Mastery = ลู่เข้าหา 6.5
   value = applyBuff(value, buff)
   value = applyBuff(value, mastery)
 
   // Accuracy Debuff + Cumulative Recoil = ลู่ออกจาก 6.5
-  value = applyDebuff(value, debuff)
-  value = applyDebuff(value, CRc)
+  value = applyDebuff(value, debuff, random)
+  value = applyDebuff(value, CRc, random)
 
   return value
 }
@@ -103,7 +104,8 @@ export function fireShot(input, state = { CRc: 0 }, random = Math.random) {
       buff,
       debuff,
       mastery,
-      state.CRc
+      state.CRc,
+      random
   )
 
   const y = applyAccuracy(
@@ -111,7 +113,8 @@ export function fireShot(input, state = { CRc: 0 }, random = Math.random) {
       buff,
       debuff,
       mastery,
-      state.CRc
+      state.CRc,
+      random
   )
 
   return {
@@ -171,13 +174,16 @@ export function fireSeries(input, random = Math.random) {
       return
     }
 
+    const subBullets = []
     for (let subBullet = 0; subBullet < subBulletCount; subBullet += 1) {
       const angle = random() * Math.PI * 2
       const distance = Math.sqrt(random()) * radius
       const x = Math.min(AIM_SIZE, Math.max(1, shot.x + Math.cos(angle) * distance))
       const y = Math.min(AIM_SIZE, Math.max(1, shot.y + Math.sin(angle) * distance))
-      shots.push({ number: shots.length + 1, round: index + 1, subBullet: subBullet + 1, x, y, result: getAimResult(x, y) })
+      subBullets.push({ number: subBullet + 1, x, y, result: getAimResult(x, y) })
     }
+
+    shots.push({ number: index + 1, round: index + 1, ...shot, subBullets })
 
   })
 

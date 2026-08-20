@@ -117,14 +117,12 @@ function fireDelay(rpm){
 
 }
 
-function shotGroups(shots){
-    return shots.reduce((groups, shot) => {
-        const round = shot.round ?? shot.number
-        const current = groups[groups.length - 1]
-        if(!current || current.round !== round) groups.push({ round, shots: [shot] })
-        else current.shots.push(shot)
-        return groups
-    }, [])
+function visibleMarkers(shots, startNumber = 0){
+    let markerNumber = startNumber
+    return shots.flatMap(shot => shot.subBullets
+        ? shot.subBullets.map(bullet => ({ ...bullet, number: ++markerNumber }))
+        : [{ ...shot, number: ++markerNumber }]
+    )
 }
 
 export async function createApp(root){
@@ -235,11 +233,7 @@ export async function createApp(root){
 
         if(rpm <= 0){
 
-            for(const shot of shots){
-
-                visibleShots.push(shot)
-
-            }
+            visibleShots.push(...visibleMarkers(shots))
 
             const impactLayer = table.querySelector(".impact-layer")
 
@@ -251,7 +245,7 @@ export async function createApp(root){
                 table.appendChild(impactLayer)
             }
 
-            for(const shot of shots){
+            for(const shot of visibleShots){
 
                 if(animation !== animationId){
                     return
@@ -270,13 +264,14 @@ export async function createApp(root){
 
         const delayTime = fireDelay(rpm)
 
-        for(const group of shotGroups(shots)){
+        for(const shot of shots){
 
             if(animation !== animationId){
                 return
             }
 
-            visibleShots.push(...group.shots)
+            const markers = visibleMarkers([shot], visibleShots.length)
+            visibleShots.push(...markers)
 
             const impactLayer = table.querySelector(".impact-layer")
 
@@ -292,8 +287,8 @@ export async function createApp(root){
                 return
             }
 
-            for(const shot of group.shots){
-                showImpact(shot.x, shot.y)
+            for(const marker of markers){
+                showImpact(marker.x, marker.y)
             }
 
             await new Promise(

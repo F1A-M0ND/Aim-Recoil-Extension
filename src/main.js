@@ -1,38 +1,23 @@
 import './style.css'
 import { isObrAvailable, OBR } from './obr/client.js'
 import { createApp } from './ui/app.js'
-import { onFire } from "./obr/sync"
-import { showFireEffect } from "./obr/effect"
-import { startPopover } from "./obr/popover.js"
-import { showPopover } from "./obr/popover.js"
+import { startPopover } from './obr/popover.js'
 
 const root = document.querySelector('#app')
 
 const setAudioStatus = async (unlocked) => {
-    if (!isObrAvailable()) return
-
-    await OBR.action.setBadgeText(unlocked ? "🔊" : "🔇")
-    await OBR.action.setTitle(`Aim & Recoil System — Audio ${unlocked ? "enabled" : "locked"}`)
+  if (!isObrAvailable()) return
+  await OBR.action.setBadgeText(unlocked ? '\u{1F50A}' : '\u{1F507}')
+  await OBR.action.setTitle(`Aim & Recoil System — Audio ${unlocked ? 'enabled' : 'locked'}`)
 }
 
-const start = () =>
-    createApp(root, {
-        isConnected: isObrAvailable(),
-        onAudioStatus: setAudioStatus
-    })
+const start = () => createApp(root, { onAudioStatus: setAudioStatus })
 
 if (isObrAvailable()) {
-
-    OBR.onReady(async () => {
-
-        await start()
-
-        await startPopover()
-
-    })
-
+  OBR.onReady(async () => {
+    await start()
+    await startPopover()
+  })
 } else {
-
-    start()
-
+  start()
 }
