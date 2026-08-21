@@ -5,6 +5,21 @@ import { createApp } from "./overlay/overlay.js"
 import { onFire } from "./obr/sync.js"
 import { createOverlayQueue } from "./queue/overlayQueue.js"
 
+const SETTINGS_KEY = "aim-recoil.settings"
+
+function readSettings(){
+
+    try{
+
+        return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}")
+
+    }catch{
+
+        return {}
+
+    }
+}
+
 OBR.onReady(async()=>{
 
     const root = document.querySelector("#app")
@@ -17,7 +32,7 @@ OBR.onReady(async()=>{
 
     await onFire((data, { isLocal })=>{
 
-        const savedSettings = JSON.parse(localStorage.getItem("aim-recoil.settings") || "{}")
+        const savedSettings = readSettings()
 
         // This is only a local-own-fire preference; remote fire is queued.
         if(isLocal && savedSettings.overlayDisplay === false)

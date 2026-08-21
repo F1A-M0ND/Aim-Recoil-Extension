@@ -17,6 +17,14 @@ const cssResult = result => result.toLowerCase().replace(' ', '-')
 const fmt = value => Number(value).toFixed(2)
 const fireDelay = rpm => Number(rpm) <= 0 ? Infinity : 60000 / Number(rpm)
 
+function readSettings() {
+  try {
+    return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
+  } catch {
+    return {}
+  }
+}
+
 function preloadSounds() {
   Object.entries(DEFAULT_SOUNDS).forEach(([name, src]) => {
     const sound = new Audio(src)
@@ -51,12 +59,15 @@ function tableMarkup(shots = []) {
 }
 
 export async function createApp(root, { onAudioStatus = () => {} } = {}) {
-  const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
+  const saved = readSettings()
   const setting = (name, fallback) => saved[name] ?? fallback
   let overlayDisplay = setting('overlayDisplay', true)
 
   root.innerHTML = `
-    <div id="audio-unlock-overlay"><div>Click to enable sound</div></div>
+    <div id="audio-unlock-overlay">
+      <button id="audio-unlock-button" type="button">Click to enable sound</button>
+      <small id="audio-unlock-status">Required before fire sounds can play.</small>
+    </div>
     <form class="app-shell" id="combat-form">
       <header><p class="eyebrow">Owlbear Rodeo · Combat Planner</p><h1>Aim System</h1></header>
       <aside class="sidebar is-open">
@@ -117,7 +128,23 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   const renderSummary = () => { resultPanel.innerHTML = displayedMarkers.length ? displayedMarkers.map(({ number, round, subBullet, rolledX, rolledY, x, y, result }) => `<div class="shot-output"><b>#${number}${subBullet ? ` · round ${round}, pellet ${subBullet}` : ''}</b> ${rolledX ? `d12 (${rolledX}, ${rolledY}) → ` : ''}(${fmt(x)}, ${fmt(y)}) <strong class="${cssResult(result)}">${result}</strong></div>`).join('') : 'Press Fire to roll d12 for X and Y.' }
   const autoSound = () => { const rpm = Number(values().rpm), count = getShotCount(values()); if (count === 1) return DEFAULT_SOUNDS.SniperRifle; if (rpm === 0) return DEFAULT_SOUNDS.Shotgun; if (rpm < 20) return DEFAULT_SOUNDS.RocketLauncher; if (rpm < 250) return DEFAULT_SOUNDS.GrenadeLauncher; if (rpm < 600) return DEFAULT_SOUNDS.Handgun; return DEFAULT_SOUNDS.AutoRifle }
   const playSound = () => { const selected = form.elements.fireSound.value, sound = selected === 'Auto' ? new Audio(autoSound()) : fireSound.cloneNode(); sound.volume = 1; sound.currentTime = 0; sound.play().catch(() => {}) }
-  async function unlockAudio(force = false) { if (audioUnlocked && !force) return; await Promise.all(Object.values(SOUND_CACHE).map(sound => { sound.volume = 0; return sound.play().then(() => { sound.pause(); sound.currentTime = 0 }).catch(() => {}) })); audioUnlocked = true; onAudioStatus(true) }
+  async function unlockAudio(force = false) {
+    if (audioUnlocked && !force) return true
+    const results = await Promise.all(Object.values(SOUND_CACHE).map(sound => {
+      const unlockSound = sound.cloneNode()
+      unlockSound.volume = 0
+      unlockSound.currentTime = 0
+      return unlockSound.play().then(() => {
+        unlockSound.pause()
+        unlockSound.currentTime = 0
+        return true
+      }).catch(() => false)
+    }))
+    if (!results.some(Boolean)) return false
+    audioUnlocked = true
+    Promise.resolve(onAudioStatus(true)).catch(error => console.log('audio status error:', error))
+    return true
+  }
   async function playFireAnimation(shots, rpm) { for (const shot of shots) { const markers = visibleShots([shot], visibleMarkers.length); visibleMarkers.push(...markers); displayedMarkers.push(...markers); renderTable(); renderSummary(); playSound(); markers.forEach(marker => showImpact(marker.x, marker.y)); if (rpm > 0) await new Promise(resolve => setTimeout(resolve, fireDelay(rpm))) } }
 
   root.querySelector('.menu-toggle').addEventListener('click', event => { const sidebar = root.querySelector('.sidebar'); sidebar.classList.toggle('is-open'); event.currentTarget.setAttribute('aria-expanded', String(sidebar.classList.contains('is-open'))) })
@@ -127,7 +154,19 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   form.addEventListener('change', event => { if (event.target.name === 'fireSound') { if (event.target.value === 'Upload') root.querySelector('#fire-sound-upload').click(); else fireSound = new Audio(DEFAULT_SOUNDS[event.target.value] || DEFAULT_SOUNDS.Bullet) } save(); setMode(); applyTable() })
   root.querySelector('#fire-sound-upload').addEventListener('change', event => { if (event.target.files[0]) fireSound = new Audio(URL.createObjectURL(event.target.files[0])) })
   root.querySelector('#reload-sound').addEventListener('click', async event => { event.currentTarget.disabled = true; preloadSounds(); const selected = form.elements.fireSound.value; if (DEFAULT_SOUNDS[selected]) fireSound = new Audio(DEFAULT_SOUNDS[selected]); await unlockAudio(true); event.currentTarget.disabled = false })
-  root.querySelector('#audio-unlock-overlay').addEventListener('pointerdown', async event => { await unlockAudio(); event.currentTarget.remove() }, { once: true })
+  const audioOverlay = root.querySelector('#audio-unlock-overlay')
+  const audioUnlockButton = root.querySelector('#audio-unlock-button')
+  const audioUnlockStatus = root.querySelector('#audio-unlock-status')
+  audioUnlockButton.addEventListener('click', async () => {
+    audioUnlockButton.disabled = true
+    audioUnlockStatus.textContent = 'Enabling sound...'
+    if (await unlockAudio()) {
+      audioOverlay.remove()
+      return
+    }
+    audioUnlockStatus.textContent = 'Sound could not start. Click again.'
+    audioUnlockButton.disabled = false
+  })
   form.addEventListener('submit', async event => { event.preventDefault(); if (isFiring) return; isFiring = true; const button = root.querySelector('.fire-button'); button.disabled = true; const input = values(); firedShots = fireSeries(input); visibleMarkers = []; displayedMarkers = []; renderTable(); const allMarkers = visibleShots(firedShots); const summary = allMarkers.reduce((counts, { result }) => ({ ...counts, [result]: (counts[result] || 0) + 1 }), {}); try { await sendFire({ shots: firedShots, rpm: Number(input.rpm), shotCount: getShotCount(input), summary }) } catch (error) { console.log('sync error:', error) } table.classList.add('is-firing'); await new Promise(resolve => setTimeout(resolve, 1000)); await playFireAnimation(firedShots, Number(input.rpm)); table.classList.remove('is-firing'); const count = getShotCount(input); shotCount.textContent = `${count} shot${count === 1 ? '' : 's'} fired`; message.textContent = Object.entries(summary).map(([name, total]) => `${total} ${name}`).join(' · '); isFiring = false; button.disabled = false })
-  renderTable(); renderSummary(); setMode(); applyTable(); updateOverlayToggle(); onAudioStatus(false)
+  renderTable(); renderSummary(); setMode(); applyTable(); updateOverlayToggle(); Promise.resolve(onAudioStatus(false)).catch(error => console.log('audio status error:', error))
 }
