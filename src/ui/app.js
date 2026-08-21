@@ -231,6 +231,8 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   const saved = readSettings()
   const setting = (name, fallback) => saved[name] ?? fallback
   let overlayDisplay = setting('overlayDisplay', true)
+  let enterToFire = setting('enterToFire', true)
+  let activePage = 'fire'
 
   root.innerHTML = `
     <div id="audio-unlock-overlay" role="button" tabindex="0" aria-label="Click to enable sound">
@@ -273,7 +275,7 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
             </div>
           </section>
         </section>
-        <section class="page" data-page-panel="misc"><section class="control-card"><h2>Table</h2><div class="field-grid"><label>Table Size <input name="tableSize" type="number" min="220" max="900" value="${setting('tableSize', 360)}"></label><label>Perfect color <input name="perfectColor" type="color" value="${setting('perfectColor', '#fff896')}"></label><label>Good color <input name="goodColor" type="color" value="${setting('goodColor', '#f9d36b')}"></label><label>Bad color <input name="badColor" type="color" value="${setting('badColor', '#f89d59')}"></label><label>Miss color <input name="missColor" type="color" value="${setting('missColor', '#f1635c')}"></label></div><h2 class="utility-heading">Fix / Utility</h2><button id="reload-sound" class="utility-button" type="button">Reload Sound</button><small>Reloads the cached sound resources without changing your selected Fire Sound.</small></section></section>
+        <section class="page" data-page-panel="misc"><section class="control-card"><h2>Table</h2><div class="field-grid"><label>Table Size <input name="tableSize" type="number" min="220" max="900" value="${setting('tableSize', 360)}"></label><label>Perfect color <input name="perfectColor" type="color" value="${setting('perfectColor', '#fff896')}"></label><label>Good color <input name="goodColor" type="color" value="${setting('goodColor', '#f9d36b')}"></label><label>Bad color <input name="badColor" type="color" value="${setting('badColor', '#f89d59')}"></label><label>Miss color <input name="missColor" type="color" value="${setting('missColor', '#f1635c')}"></label></div><h2 class="utility-heading">Fix / Utility</h2><label class="checkbox-field"><input name="enterToFire" type="checkbox" ${enterToFire ? 'checked' : ''}> Enter on Weapon jumps to Fire and shoots</label><button id="reload-sound" class="utility-button" type="button">Reload Sound</button><small>Reloads the cached sound resources without changing your selected Fire Sound.</small></section></section>
       </div>
     </form>`
 
@@ -290,9 +292,14 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   createImpactLayer(table)
 
   const values = () => ({ ...Object.fromEntries(new FormData(form)), shotgun: !form.elements.shotgun.disabled && form.elements.shotgun.checked })
-  const save = () => localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...Object.fromEntries(new FormData(form)), shotgun: form.elements.shotgun.checked, overlayDisplay }))
+  const save = () => localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...Object.fromEntries(new FormData(form)), shotgun: form.elements.shotgun.checked, overlayDisplay, enterToFire: form.elements.enterToFire.checked }))
   const updateOverlayToggle = () => { overlayToggle.setAttribute('aria-pressed', String(overlayDisplay)); overlayToggle.textContent = overlayDisplay ? '👁' : '⊘'; overlayToggle.title = `Overlay Display: ${overlayDisplay ? 'On' : 'Off'}` }
   const applyTable = () => { const v = values(); table.style.width = `${Math.max(220, Math.min(900, Number(v.tableSize) || 360))}px`; table.style.setProperty('--perfect-colour', v.perfectColor); table.style.setProperty('--good-colour', v.goodColor); table.style.setProperty('--bad-colour', v.badColor); table.style.setProperty('--miss-colour', v.missColor) }
+  const showPage = pageName => {
+    activePage = pageName
+    root.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('is-active', item.dataset.page === pageName))
+    root.querySelectorAll('[data-page-panel]').forEach(panel => panel.classList.toggle('is-active', panel.dataset.pagePanel === pageName))
+  }
   const applyFocus = () => {
     const target = focusTarget
     const markers = table.querySelectorAll('.shot-marker')
@@ -371,10 +378,19 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   async function playFireAnimation(shots, rpm) { for (const shot of shots) { const markers = visibleShots([shot], visibleMarkers.length); visibleMarkers.push(...markers); displayedMarkers.push(...markers); renderTable(); renderSummary(); playSound(); markers.forEach(marker => showImpact(marker.x, marker.y)); if (rpm > 0) await new Promise(resolve => setTimeout(resolve, fireDelay(rpm))) } }
 
   root.querySelector('.menu-toggle').addEventListener('click', event => { const sidebar = root.querySelector('.sidebar'); sidebar.classList.toggle('is-open'); event.currentTarget.setAttribute('aria-expanded', String(sidebar.classList.contains('is-open'))) })
-  root.querySelectorAll('.nav-item').forEach(button => button.addEventListener('click', () => { root.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('is-active', item === button)); root.querySelectorAll('[data-page-panel]').forEach(panel => panel.classList.toggle('is-active', panel.dataset.pagePanel === button.dataset.page)) }))
+  root.querySelectorAll('.nav-item').forEach(button => button.addEventListener('click', () => showPage(button.dataset.page)))
   overlayToggle.addEventListener('click', () => { overlayDisplay = !overlayDisplay; updateOverlayToggle(); save() })
-  form.addEventListener('input', () => { save(); setMode(); applyTable() })
-  form.addEventListener('change', event => { if (event.target.name === 'fireSound') { if (event.target.value === 'Upload') root.querySelector('#fire-sound-upload').click(); else fireSound = new Audio(DEFAULT_SOUNDS[event.target.value] || DEFAULT_SOUNDS.Bullet) } save(); setMode(); applyTable() })
+  form.addEventListener('input', () => { enterToFire = form.elements.enterToFire.checked; save(); setMode(); applyTable() })
+  form.addEventListener('keydown', event => {
+    if (event.key !== 'Enter') return
+    if (!enterToFire) return
+    if (activePage !== 'weapon') return
+    if (event.target.closest('button, select, textarea')) return
+    event.preventDefault()
+    showPage('fire')
+    form.requestSubmit()
+  })
+  form.addEventListener('change', event => { if (event.target.name === 'fireSound') { if (event.target.value === 'Upload') root.querySelector('#fire-sound-upload').click(); else fireSound = new Audio(DEFAULT_SOUNDS[event.target.value] || DEFAULT_SOUNDS.Bullet) } enterToFire = form.elements.enterToFire.checked; save(); setMode(); applyTable() })
   root.querySelector('#fire-sound-upload').addEventListener('change', event => { if (event.target.files[0]) fireSound = new Audio(URL.createObjectURL(event.target.files[0])) })
   root.querySelector('#reload-sound').addEventListener('click', async event => { event.currentTarget.disabled = true; preloadSounds(); const selected = form.elements.fireSound.value; if (DEFAULT_SOUNDS[selected]) fireSound = new Audio(DEFAULT_SOUNDS[selected]); await unlockAudio(true); event.currentTarget.disabled = false })
   const audioOverlay = root.querySelector('#audio-unlock-overlay')
@@ -444,5 +460,5 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
     clearFocus()
   })
   form.addEventListener('submit', async event => { event.preventDefault(); if (isFiring) return; isFiring = true; clearFocus(); const button = root.querySelector('.fire-button'); button.disabled = true; const input = values(); firedShots = fireSeries(input); visibleMarkers = []; displayedMarkers = []; renderTable(); const allMarkers = visibleShots(firedShots); const summary = allMarkers.reduce((counts, { result }) => ({ ...counts, [result]: (counts[result] || 0) + 1 }), {}); try { await sendFire({ shots: firedShots, rpm: Number(input.rpm), shotCount: getShotCount(input), summary }) } catch (error) { console.log('sync error:', error) } table.classList.add('is-firing'); await new Promise(resolve => setTimeout(resolve, 1000)); await playFireAnimation(firedShots, Number(input.rpm)); table.classList.remove('is-firing'); const count = getShotCount(input); shotCount.textContent = `${count} shot${count === 1 ? '' : 's'} fired`; message.textContent = Object.entries(summary).map(([name, total]) => `${total} ${name}`).join(' · '); isFiring = false; button.disabled = false })
-  renderTable(); renderSummary(); setMode(); applyTable(); updateOverlayToggle(); Promise.resolve(onAudioStatus(false)).catch(error => console.log('audio status error:', error))
+  renderTable(); renderSummary(); setMode(); applyTable(); updateOverlayToggle(); showPage('fire'); Promise.resolve(onAudioStatus(false)).catch(error => console.log('audio status error:', error))
 }

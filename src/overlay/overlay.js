@@ -6,7 +6,7 @@ import {
 } from "../obr/popover.js"
 
 import {createImpactLayer, showImpact} from "../effect/impact.js"
-import { AIM_SIZE } from "../logic/calculator.js"
+import { AIM_SIZE, getCriticalMissDirection } from "../logic/calculator.js"
 
 const SHOT_COLORS = {
     0:"#ff6b6b",
@@ -41,6 +41,12 @@ function getShotColor(number){
 
 }
 
+function getRoundColor(number){
+
+    return SHOT_COLORS[(Math.max(1, Number(number)) - 1) % 10]
+
+}
+
 function tableMarkup(shots=[]){
 
     const cells = `
@@ -57,7 +63,7 @@ function tableMarkup(shots=[]){
 
 
     const markers = shots.map(
-        ({x,y,number})=>{
+        ({x,y,number,round,result,criticalMissDirection,criticalMissArrow})=>{
 
 
             const left =
@@ -67,6 +73,30 @@ function tableMarkup(shots=[]){
             const top =
                 ((y-.5)/AIM_SIZE)*100
 
+            if(result === "CRITICAL MISS"){
+                const direction =
+                    criticalMissDirection || getCriticalMissDirection(x, y)
+
+                const clampedLeft =
+                    x < .5 ? 0 : x > AIM_SIZE + .5 ? 100 : left
+
+                const clampedTop =
+                    y < .5 ? 0 : y > AIM_SIZE + .5 ? 100 : top
+
+                return `
+            <button
+            class="shot-critical-miss is-${direction}"
+            style="
+            left:${clampedLeft}%;
+            top:${clampedTop}%;
+            --marker-colour:${getRoundColor(round ?? number)};
+            "
+            >
+            <span class="shot-critical-miss-dot"></span>
+            <span class="shot-critical-miss-triangle"></span>
+            </button>
+            `
+            }
 
             return `
             <button
@@ -74,7 +104,7 @@ function tableMarkup(shots=[]){
             style="
             left:${left}%;
             top:${top}%;
-            --marker-colour:${getShotColor(number)};
+            --marker-colour:${getRoundColor(round ?? number)};
             "
             >
             ${number}
@@ -120,8 +150,8 @@ function fireDelay(rpm){
 function visibleMarkers(shots, startNumber = 0){
     let markerNumber = startNumber
     return shots.flatMap(shot => shot.subBullets
-        ? shot.subBullets.map(bullet => ({ ...bullet, number: ++markerNumber }))
-        : [{ ...shot, number: ++markerNumber }]
+        ? shot.subBullets.map((bullet, index) => ({ ...bullet, number: ++markerNumber, round: shot.number, subBullet: index + 1 }))
+        : [{ ...shot, number: ++markerNumber, round: shot.number }]
     )
 }
 

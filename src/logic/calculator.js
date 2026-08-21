@@ -29,6 +29,16 @@ export function getCriticalMissArrow(x, y) {
   return ''
 }
 
+export function getCriticalMissDirection(x, y) {
+  const horizontal = x < 0.5 ? 'left' : x > AIM_SIZE + 0.5 ? 'right' : ''
+  const vertical = y < 0.5 ? 'up' : y > AIM_SIZE + 0.5 ? 'down' : ''
+
+  if (horizontal && vertical) return `${vertical}-${horizontal}`
+  if (horizontal) return horizontal
+  if (vertical) return vertical
+  return 'right'
+}
+
 function applyDebuff(value, amount, random = Math.random) {
   // A debuff always moves a die away from the true centre of the table.
   if (value === 6.5) return random() < 0.5 ? value - amount : value + amount
@@ -141,7 +151,9 @@ export function fireShot(input, state = { CRc: 0 }, random = Math.random) {
     x,
     y,
     CRc: state.CRc,
-    result: getAimResult(x, y)
+    result: getAimResult(x, y),
+    criticalMissDirection: getCriticalMissDirection(x, y),
+    criticalMissArrow: getCriticalMissArrow(x, y)
   }
 }
 
@@ -203,6 +215,7 @@ export function fireSeries(input, random = Math.random) {
         x,
         y,
         result: getAimResult(x, y),
+        criticalMissDirection: getCriticalMissDirection(x, y),
         criticalMissArrow: getCriticalMissArrow(x, y)
       })
     }

@@ -373,6 +373,61 @@ body,
 
 }
 
+.shot-critical-miss {
+
+    position:absolute;
+
+    z-index:11;
+
+    width:18px;
+    height:18px;
+
+    padding:0;
+    margin:0;
+    border:0;
+    background:transparent;
+    pointer-events:none;
+    transform:translate(-50%,-50%);
+
+}
+
+.shot-critical-miss-dot {
+
+    position:absolute;
+    inset:0;
+
+    border-radius:50%;
+    background:var(--marker-colour);
+    box-shadow:0 0 0 2px rgba(255,255,255,.9), 0 0 10px var(--marker-colour);
+
+}
+
+.shot-critical-miss-triangle {
+
+    position:absolute;
+    left:50%;
+    top:50%;
+
+    width:0;
+    height:0;
+
+    border-left:4px solid transparent;
+    border-right:4px solid transparent;
+    border-top:7px solid var(--marker-colour);
+
+    transform:translate(-50%,-50%);
+
+}
+
+.shot-critical-miss.is-up .shot-critical-miss-triangle { transform:translate(-50%,-50%) rotate(0deg); }
+.shot-critical-miss.is-down .shot-critical-miss-triangle { transform:translate(-50%,-50%) rotate(180deg); }
+.shot-critical-miss.is-left .shot-critical-miss-triangle { transform:translate(-50%,-50%) rotate(-90deg); }
+.shot-critical-miss.is-right .shot-critical-miss-triangle { transform:translate(-50%,-50%) rotate(90deg); }
+.shot-critical-miss.is-up-left .shot-critical-miss-triangle { transform:translate(-50%,-50%) rotate(-135deg); }
+.shot-critical-miss.is-up-right .shot-critical-miss-triangle { transform:translate(-50%,-50%) rotate(-45deg); }
+.shot-critical-miss.is-down-left .shot-critical-miss-triangle { transform:translate(-50%,-50%) rotate(135deg); }
+.shot-critical-miss.is-down-right .shot-critical-miss-triangle { transform:translate(-50%,-50%) rotate(45deg); }
+
 
 /* IMPACT EFFECT */
 
