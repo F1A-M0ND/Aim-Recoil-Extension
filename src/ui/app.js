@@ -12,6 +12,7 @@ const DEFAULT_SOUNDS = {
 const SOUND_CACHE = {}
 const COLORS = ['#ff6b6b', '#4dabf7', '#51cf66', '#845ef7', '#fcc419', '#ff922b', '#20c997', '#e599f7', '#74c0fc', '#adb5bd']
 const LABELS = { PERFECT: 'P', GOOD: 'G', BAD: 'B', MISS: 'M' }
+const RESULT_ORDER = ['PERFECT', 'GOOD', 'BAD', 'MISS']
 
 const cssResult = result => result.toLowerCase().replace(' ', '-')
 const fmt = value => Number(value).toFixed(2)
@@ -41,6 +42,116 @@ function visibleShots(shots, startNumber = 0) {
     : [{ ...shot, number: ++markerNumber, round: shot.number }])
 }
 
+function countResults(items = []) {
+  return items.reduce((counts, { result }) => {
+    counts[result] = (counts[result] || 0) + 1
+    return counts
+  }, {})
+}
+
+function formatResultCounts(counts) {
+  return RESULT_ORDER
+    .filter(name => counts[name] > 0)
+    .map(name => `${counts[name]} ${name.toLowerCase()}`)
+    .join(' · ')
+}
+
+function groupMarkersByRound(markers = []) {
+  const rounds = new Map()
+
+  markers.forEach(marker => {
+    const roundNumber = Number(marker.round ?? marker.number)
+    const group = rounds.get(roundNumber) ?? {
+      number: roundNumber,
+      x: marker.x,
+      y: marker.y,
+      rolledX: marker.rolledX,
+      rolledY: marker.rolledY,
+      result: marker.result,
+      subBullets: []
+    }
+
+    if (marker.subBullet == null) {
+      group.x = marker.x
+      group.y = marker.y
+      group.rolledX = marker.rolledX
+      group.rolledY = marker.rolledY
+      group.result = marker.result
+    } else {
+      group.subBullets.push(marker)
+    }
+
+    rounds.set(roundNumber, group)
+  })
+
+  return [...rounds.values()].sort((a, b) => a.number - b.number).map(group => ({
+    ...group,
+    subBullets: group.subBullets.sort((a, b) => Number(a.subBullet) - Number(b.subBullet))
+  }))
+}
+
+function describeShotTarget({ round, subBullet = null }) {
+  return { round: Number(round), subBullet: subBullet == null ? null : Number(subBullet) }
+}
+
+function targetMatchesElement(target, element) {
+  const round = Number(element.dataset.round)
+  if (round !== target.round) return false
+  if (target.subBullet == null) return true
+  return Number(element.dataset.subbullet) === target.subBullet
+}
+
+function shotMarkerMarkup(marker) {
+  const focusAttrs = marker.subBullet
+    ? `data-round="${marker.round}" data-subbullet="${marker.subBullet}" data-focus-target="subbullet"`
+    : `data-round="${marker.round}" data-focus-target="round"`
+  return `<button type="button" class="shot-marker" data-shot="${marker.number}" ${focusAttrs} style="left:${((Math.max(0, Math.min(13, marker.x)) - .5) / AIM_SIZE) * 100}%;top:${((Math.max(0, Math.min(13, marker.y)) - .5) / AIM_SIZE) * 100}%;--marker-colour:${COLORS[marker.number % 10]}">${marker.number}</button>`
+}
+
+function renderShotSummary(shot) {
+  const roundLabel = `Round ${shot.number}`
+  if (shot.subBullets?.length) {
+    const counts = countResults(shot.subBullets)
+    const detail = formatResultCounts(counts)
+    const roll = shot.rolledX ? `d12 (${shot.rolledX}, ${shot.rolledY}) → ` : ''
+    return `
+      <details class="shot-round" data-round="${shot.number}" data-focus-target="round">
+        <summary class="shot-round-summary">
+          <span class="shot-round-title">${roundLabel}</span>
+          <span class="shot-round-meta">${roll}(${fmt(shot.x)}, ${fmt(shot.y)})${detail ? ` · ${detail}` : ''}</span>
+        </summary>
+        <div class="shot-round-details">
+          ${shot.subBullets.map(bullet => `
+            <button
+              type="button"
+              class="shot-subshot"
+              data-round="${shot.number}"
+              data-subbullet="${bullet.number}"
+              data-focus-target="subbullet"
+            >
+              <span class="shot-subshot-title">Pellet ${bullet.number}</span>
+              <span class="shot-subshot-meta">(${fmt(bullet.x)}, ${fmt(bullet.y)}) <strong class="${cssResult(bullet.result)}">${bullet.result}</strong></span>
+            </button>
+          `).join('')}
+        </div>
+      </details>
+    `
+  }
+
+  const roll = shot.rolledX ? `d12 (${shot.rolledX}, ${shot.rolledY}) → ` : ''
+  return `
+    <button
+      type="button"
+      class="shot-round shot-round--single"
+      data-round="${shot.number}"
+      data-focus-target="round"
+    >
+      <span class="shot-round-title">${roundLabel}</span>
+      <span class="shot-round-meta">${roll}(${fmt(shot.x)}, ${fmt(shot.y)}) <strong class="${cssResult(shot.result)}">${shot.result}</strong></span>
+    </button>
+  `
+}
+
 function cellType(x, y) {
   if ((y === 6 || y === 7) && (x === 6 || x === 7)) return 'PERFECT'
   if (y >= 5 && y <= 8 && x >= 5 && x <= 8) return 'GOOD'
@@ -54,7 +165,7 @@ function tableMarkup(shots = []) {
     const result = cellType(x, y)
     cells += `<span class="aim-cell ${cssResult(result)}">${LABELS[result]}</span>`
   }
-  const markers = shots.map(({ x, y, number }) => `<button class="shot-marker" data-shot="${number}" style="left:${((Math.max(0, Math.min(13, x)) - .5) / AIM_SIZE) * 100}%;top:${((Math.max(0, Math.min(13, y)) - .5) / AIM_SIZE) * 100}%;--marker-colour:${COLORS[number % 10]}">${number}</button>`).join('')
+  const markers = shots.map(shotMarkerMarkup).join('')
   return `<div class="aim-grid">${cells}</div><div class="aim-rings"><i></i><i></i><i></i><b></b><em></em></div><div class="marker-layer">${markers}</div>`
 }
 
@@ -64,8 +175,8 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   let overlayDisplay = setting('overlayDisplay', true)
 
   root.innerHTML = `
-    <div id="audio-unlock-overlay">
-      <button id="audio-unlock-button" type="button">Click to enable sound</button>
+    <div id="audio-unlock-overlay" role="button" tabindex="0" aria-label="Click to enable sound">
+      <div id="audio-unlock-button">Click to enable sound</div>
       <small id="audio-unlock-status">Required before fire sounds can play.</small>
     </div>
     <form class="app-shell" id="combat-form">
@@ -96,8 +207,8 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
               <label data-mode="count">Rounds <input name="rounds" type="number" min="1" max="120" value="${setting('rounds', 1)}"><small>main shots to fire</small></label>
               <label data-mode="time" hidden>Time Trigger <input name="duration" type="number" min="0.1" max="60" step="0.1" value="${setting('duration', 1)}"></label>
               <label class="checkbox-field" data-mode="count"><input name="shotgun" type="checkbox" ${setting('shotgun', false) ? 'checked' : ''}> Shotgun</label>
-              <label data-shotgun>Radius <input name="shotgunRadius" type="number" min="0" step="0.1" value="${setting('shotgunRadius', 2)}"></label>
-              <label data-shotgun>Sub-bullet <input name="shotgunSubBullet" type="number" min="1" max="120" step="1" value="${setting('shotgunSubBullet', 8)}"></label>
+              <label data-shotgun class="shotgun-field">Radius <input name="shotgunRadius" type="number" min="0" step="0.1" value="${setting('shotgunRadius', 2)}"></label>
+              <label data-shotgun class="shotgun-field">Sub-bullet <input name="shotgunSubBullet" type="number" min="1" max="120" step="1" value="${setting('shotgunSubBullet', 8)}"></label>
               <label>Accuracy Debuff <input name="debuff" type="number" min="0" step="0.01" value="${setting('debuff', 0)}"></label><label>Accuracy Buff <input name="buff" type="number" min="0" step="0.01" value="${setting('buff', 0)}"></label>
               <label>Weapon Recoil <input name="recoil" type="number" min="0" step="0.01" value="${setting('recoil', 0)}"></label><label>Weapon Mastery <input name="mastery" type="number" min="0" step="0.01" value="${setting('mastery', 0)}"></label><label>Strength <input name="str" type="number" min="0" step="1" value="${setting('str', 0)}"></label>
               <label>Fire Sound <select name="fireSound"><option value="Auto">Auto</option>${Object.keys(DEFAULT_SOUNDS).map(name => `<option value="${name}" ${setting('fireSound', 'Auto') === name ? 'selected' : ''}>${name}</option>`).join('')}<option value="Upload">Upload Sound…</option></select><input id="fire-sound-upload" type="file" accept="audio/*" hidden></label>
@@ -117,15 +228,69 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   const overlayToggle = root.querySelector('#overlay-display-toggle')
   let fireSound = SOUND_CACHE.Bullet.cloneNode()
   let firedShots = [], visibleMarkers = [], displayedMarkers = [], isFiring = false
+  let focusTarget = null
   createImpactLayer(table)
 
   const values = () => ({ ...Object.fromEntries(new FormData(form)), shotgun: !form.elements.shotgun.disabled && form.elements.shotgun.checked })
   const save = () => localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...Object.fromEntries(new FormData(form)), shotgun: form.elements.shotgun.checked, overlayDisplay }))
   const updateOverlayToggle = () => { overlayToggle.setAttribute('aria-pressed', String(overlayDisplay)); overlayToggle.textContent = overlayDisplay ? '👁' : '⊘'; overlayToggle.title = `Overlay Display: ${overlayDisplay ? 'On' : 'Off'}` }
   const applyTable = () => { const v = values(); table.style.width = `${Math.max(220, Math.min(900, Number(v.tableSize) || 360))}px`; table.style.setProperty('--perfect-colour', v.perfectColor); table.style.setProperty('--good-colour', v.goodColor); table.style.setProperty('--bad-colour', v.badColor); table.style.setProperty('--miss-colour', v.missColor) }
-  const setMode = () => { const time = form.elements.mode.value === 'time'; form.elements.shotgun.disabled = time; const v = values(); form.querySelectorAll('[data-mode="time"]').forEach(el => { el.hidden = !time }); form.querySelectorAll('[data-mode="count"]').forEach(el => { el.hidden = time }); form.querySelectorAll('[data-shotgun]').forEach(el => { el.hidden = time || !v.shotgun }); const count = getShotCount(v); shotCount.textContent = `Will fire ${count} shot${count === 1 ? '' : 's'}` }
-  const renderTable = () => { const layer = table.querySelector('.impact-layer'); table.innerHTML = tableMarkup(visibleMarkers); if (layer) table.appendChild(layer) }
-  const renderSummary = () => { resultPanel.innerHTML = displayedMarkers.length ? displayedMarkers.map(({ number, round, subBullet, rolledX, rolledY, x, y, result }) => `<div class="shot-output"><b>#${number}${subBullet ? ` · round ${round}, pellet ${subBullet}` : ''}</b> ${rolledX ? `d12 (${rolledX}, ${rolledY}) → ` : ''}(${fmt(x)}, ${fmt(y)}) <strong class="${cssResult(result)}">${result}</strong></div>`).join('') : 'Press Fire to roll d12 for X and Y.' }
+  const applyFocus = () => {
+    const target = focusTarget
+    const markers = table.querySelectorAll('.shot-marker')
+    const resultItems = resultPanel.querySelectorAll('[data-focus-target]')
+    const allInteractive = [...markers, ...resultItems]
+
+    if (!target) {
+      allInteractive.forEach(el => { el.classList.remove('is-focused', 'is-muted') })
+      table.classList.remove('has-focus')
+      resultPanel.classList.remove('has-focus')
+      return
+    }
+
+    let matched = false
+    allInteractive.forEach(el => {
+      const hit = targetMatchesElement(target, el)
+      el.classList.toggle('is-focused', hit)
+      el.classList.toggle('is-muted', !hit)
+      if (hit) matched = true
+    })
+
+    if (!matched) {
+      focusTarget = null
+      applyFocus()
+      return
+    }
+
+    table.classList.toggle('has-focus', true)
+    resultPanel.classList.toggle('has-focus', true)
+  }
+  const setFocus = target => { focusTarget = target ? describeShotTarget(target) : null; applyFocus() }
+  const clearFocus = () => setFocus(null)
+  const setMode = () => {
+    const time = form.elements.mode.value === 'time'
+    form.elements.shotgun.disabled = time
+    const v = values()
+    form.querySelectorAll('[data-mode="time"]').forEach(el => { el.hidden = !time })
+    form.querySelectorAll('[data-mode="count"]').forEach(el => { el.hidden = time })
+    form.querySelectorAll('[data-shotgun]').forEach(el => {
+      el.hidden = time
+      el.classList.toggle('is-active', !time && v.shotgun)
+    })
+    const count = getShotCount(v)
+    shotCount.textContent = `Will fire ${count} shot${count === 1 ? '' : 's'}`
+  }
+  const renderTable = () => { const layer = table.querySelector('.impact-layer'); table.innerHTML = tableMarkup(visibleMarkers); if (layer) table.appendChild(layer); applyFocus() }
+  const renderSummary = () => {
+    if (!displayedMarkers.length) {
+      resultPanel.innerHTML = 'Press Fire to roll d12 for X and Y.'
+      applyFocus()
+      return
+    }
+
+    resultPanel.innerHTML = firedShots.filter(shot => displayedMarkers.some(marker => marker.round === shot.number)).map(renderShotSummary).join('')
+    applyFocus()
+  }
   const autoSound = () => { const rpm = Number(values().rpm), count = getShotCount(values()); if (count === 1) return DEFAULT_SOUNDS.SniperRifle; if (rpm === 0) return DEFAULT_SOUNDS.Shotgun; if (rpm < 20) return DEFAULT_SOUNDS.RocketLauncher; if (rpm < 250) return DEFAULT_SOUNDS.GrenadeLauncher; if (rpm < 600) return DEFAULT_SOUNDS.Handgun; return DEFAULT_SOUNDS.AutoRifle }
   const playSound = () => { const selected = form.elements.fireSound.value, sound = selected === 'Auto' ? new Audio(autoSound()) : fireSound.cloneNode(); sound.volume = 1; sound.currentTime = 0; sound.play().catch(() => {}) }
   async function unlockAudio(force = false) {
@@ -141,9 +306,9 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
       }).catch(() => false)
     }))
     if (!results.some(Boolean)) return false
-    audioUnlocked = true
-    Promise.resolve(onAudioStatus(true)).catch(error => console.log('audio status error:', error))
-    return true
+      audioUnlocked = true
+      Promise.resolve(onAudioStatus(true)).catch(error => console.log('audio status error:', error))
+      return true
   }
   async function playFireAnimation(shots, rpm) { for (const shot of shots) { const markers = visibleShots([shot], visibleMarkers.length); visibleMarkers.push(...markers); displayedMarkers.push(...markers); renderTable(); renderSummary(); playSound(); markers.forEach(marker => showImpact(marker.x, marker.y)); if (rpm > 0) await new Promise(resolve => setTimeout(resolve, fireDelay(rpm))) } }
 
@@ -157,7 +322,7 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   const audioOverlay = root.querySelector('#audio-unlock-overlay')
   const audioUnlockButton = root.querySelector('#audio-unlock-button')
   const audioUnlockStatus = root.querySelector('#audio-unlock-status')
-  audioUnlockButton.addEventListener('click', async () => {
+  const tryUnlockAudio = async () => {
     audioUnlockButton.disabled = true
     audioUnlockStatus.textContent = 'Enabling sound...'
     if (await unlockAudio()) {
@@ -166,7 +331,54 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
     }
     audioUnlockStatus.textContent = 'Sound could not start. Click again.'
     audioUnlockButton.disabled = false
+  }
+  audioOverlay.addEventListener('click', event => {
+    if (event.target.closest('#audio-unlock-button') || event.target === audioOverlay) {
+      tryUnlockAudio()
+    }
   })
-  form.addEventListener('submit', async event => { event.preventDefault(); if (isFiring) return; isFiring = true; const button = root.querySelector('.fire-button'); button.disabled = true; const input = values(); firedShots = fireSeries(input); visibleMarkers = []; displayedMarkers = []; renderTable(); const allMarkers = visibleShots(firedShots); const summary = allMarkers.reduce((counts, { result }) => ({ ...counts, [result]: (counts[result] || 0) + 1 }), {}); try { await sendFire({ shots: firedShots, rpm: Number(input.rpm), shotCount: getShotCount(input), summary }) } catch (error) { console.log('sync error:', error) } table.classList.add('is-firing'); await new Promise(resolve => setTimeout(resolve, 1000)); await playFireAnimation(firedShots, Number(input.rpm)); table.classList.remove('is-firing'); const count = getShotCount(input); shotCount.textContent = `${count} shot${count === 1 ? '' : 's'} fired`; message.textContent = Object.entries(summary).map(([name, total]) => `${total} ${name}`).join(' · '); isFiring = false; button.disabled = false })
+  audioOverlay.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      tryUnlockAudio()
+    }
+  })
+  table.addEventListener('pointerover', event => {
+    const marker = event.target.closest('.shot-marker')
+    if (!marker) return
+    setFocus(marker.dataset.subbullet ? { round: marker.dataset.round, subBullet: marker.dataset.subbullet } : { round: marker.dataset.round })
+  })
+  table.addEventListener('pointerout', event => {
+    if (event.relatedTarget && table.contains(event.relatedTarget)) return
+    clearFocus()
+  })
+  table.addEventListener('focusin', event => {
+    const marker = event.target.closest('.shot-marker')
+    if (!marker) return
+    setFocus(marker.dataset.subbullet ? { round: marker.dataset.round, subBullet: marker.dataset.subbullet } : { round: marker.dataset.round })
+  })
+  table.addEventListener('focusout', event => {
+    if (event.relatedTarget && table.contains(event.relatedTarget)) return
+    clearFocus()
+  })
+  resultPanel.addEventListener('pointerover', event => {
+    const item = event.target.closest('[data-focus-target]')
+    if (!item) return
+    setFocus(item.dataset.subbullet ? { round: item.dataset.round, subBullet: item.dataset.subbullet } : { round: item.dataset.round })
+  })
+  resultPanel.addEventListener('pointerout', event => {
+    if (event.relatedTarget && resultPanel.contains(event.relatedTarget)) return
+    clearFocus()
+  })
+  resultPanel.addEventListener('focusin', event => {
+    const item = event.target.closest('[data-focus-target]')
+    if (!item) return
+    setFocus(item.dataset.subbullet ? { round: item.dataset.round, subBullet: item.dataset.subbullet } : { round: item.dataset.round })
+  })
+  resultPanel.addEventListener('focusout', event => {
+    if (event.relatedTarget && resultPanel.contains(event.relatedTarget)) return
+    clearFocus()
+  })
+  form.addEventListener('submit', async event => { event.preventDefault(); if (isFiring) return; isFiring = true; clearFocus(); const button = root.querySelector('.fire-button'); button.disabled = true; const input = values(); firedShots = fireSeries(input); visibleMarkers = []; displayedMarkers = []; renderTable(); const allMarkers = visibleShots(firedShots); const summary = allMarkers.reduce((counts, { result }) => ({ ...counts, [result]: (counts[result] || 0) + 1 }), {}); try { await sendFire({ shots: firedShots, rpm: Number(input.rpm), shotCount: getShotCount(input), summary }) } catch (error) { console.log('sync error:', error) } table.classList.add('is-firing'); await new Promise(resolve => setTimeout(resolve, 1000)); await playFireAnimation(firedShots, Number(input.rpm)); table.classList.remove('is-firing'); const count = getShotCount(input); shotCount.textContent = `${count} shot${count === 1 ? '' : 's'} fired`; message.textContent = Object.entries(summary).map(([name, total]) => `${total} ${name}`).join(' · '); isFiring = false; button.disabled = false })
   renderTable(); renderSummary(); setMode(); applyTable(); updateOverlayToggle(); Promise.resolve(onAudioStatus(false)).catch(error => console.log('audio status error:', error))
 }
