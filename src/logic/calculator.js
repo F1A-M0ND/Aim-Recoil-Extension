@@ -2,7 +2,7 @@ export const AIM_SIZE = 12
 
 /** Returns the fixed result stored at a 1-based Aim Table coordinate. */
 export function getAimResult(x, y) {
-  if (x < 1 || x > AIM_SIZE || y < 1 || y > AIM_SIZE) return 'CRITICAL MISS'
+  if (x < 0.5 || x > AIM_SIZE + 0.5 || y < 0.5 || y > AIM_SIZE + 0.5) return 'CRITICAL MISS'
   const cellX = Math.round(x)
   const cellY = Math.round(y)
   if ((cellY === 6 || cellY === 7) && (cellX === 6 || cellX === 7)) return 'PERFECT'

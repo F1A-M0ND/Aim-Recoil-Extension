@@ -12,7 +12,7 @@ const DEFAULT_SOUNDS = {
 const SOUND_CACHE = {}
 const COLORS = ['#ff6b6b', '#4dabf7', '#51cf66', '#845ef7', '#fcc419', '#ff922b', '#20c997', '#e599f7', '#74c0fc', '#adb5bd']
 const LABELS = { PERFECT: 'P', GOOD: 'G', BAD: 'B', MISS: 'M' }
-const RESULT_ORDER = ['PERFECT', 'GOOD', 'BAD', 'MISS']
+const RESULT_ORDER = ['PERFECT', 'GOOD', 'BAD', 'MISS', 'CRITICAL MISS']
 
 const cssResult = result => result.toLowerCase().replace(' ', '-')
 const fmt = value => Number(value).toFixed(2)
@@ -54,6 +54,10 @@ function formatResultCounts(counts) {
     .filter(name => counts[name] > 0)
     .map(name => `${counts[name]} ${name.toLowerCase()}`)
     .join(' · ')
+}
+
+function roundColor(roundNumber) {
+  return COLORS[(Math.max(1, Number(roundNumber)) - 1) % COLORS.length]
 }
 
 function groupMarkersByRound(markers = []) {
@@ -108,13 +112,32 @@ function getCriticalMissArrow(x, y) {
   return ''
 }
 
-function describeShotTarget({ round, subBullet = null }) {
-  return { round: Number(round), subBullet: subBullet == null ? null : Number(subBullet) }
+function getCriticalMissDirection(x, y) {
+  const horizontal = x < 0.5 ? 'left' : x > AIM_SIZE + 0.5 ? 'right' : ''
+  const vertical = y < 0.5 ? 'up' : y > AIM_SIZE + 0.5 ? 'down' : ''
+
+  if (horizontal && vertical) return `${vertical}-${horizontal}`
+  if (horizontal) return horizontal
+  if (vertical) return vertical
+  return 'right'
+}
+
+function describeShotTarget(element) {
+  return {
+    round: Number(element.dataset.round),
+    subBullet: element.dataset.subbullet ? Number(element.dataset.subbullet) : null,
+    focusTarget: element.dataset.focusTarget || 'round'
+  }
 }
 
 function targetMatchesElement(target, element) {
   const round = Number(element.dataset.round)
   if (round !== target.round) return false
+  if (target.focusTarget === 'round') return true
+  if (target.focusTarget === 'critical-miss') {
+    const elementSubBullet = element.dataset.subbullet ? Number(element.dataset.subbullet) : null
+    return element.dataset.focusTarget === 'critical-miss' && elementSubBullet === target.subBullet
+  }
   if (target.subBullet == null) return true
   const focusTarget = element.dataset.focusTarget
   if (focusTarget === 'round') return true
@@ -122,13 +145,20 @@ function targetMatchesElement(target, element) {
 }
 
 function shotMarkerMarkup(marker) {
+  const markerColour = roundColor(marker.round)
+  if (marker.result === 'CRITICAL MISS') {
+    const direction = marker.criticalMissDirection || getCriticalMissDirection(marker.x, marker.y)
+    const left = marker.x < 0.5 ? 0 : marker.x > AIM_SIZE + 0.5 ? 100 : ((Math.max(0.5, Math.min(AIM_SIZE + 0.5, marker.x)) - 0.5) / AIM_SIZE) * 100
+    const top = marker.y < 0.5 ? 0 : marker.y > AIM_SIZE + 0.5 ? 100 : ((Math.max(0.5, Math.min(AIM_SIZE + 0.5, marker.y)) - 0.5) / AIM_SIZE) * 100
+    const subBulletAttr = marker.subBullet ? `data-subbullet="${marker.subBullet}"` : ''
+    return `<button type="button" class="shot-critical-miss is-${direction}" data-shot="${marker.number}" data-round="${marker.round}" ${subBulletAttr} data-focus-target="critical-miss" style="left:${left}%;top:${top}%;--marker-colour:${markerColour}"><span class="shot-critical-miss-dot"></span><span class="shot-critical-miss-triangle"></span></button>`
+  }
   const focusAttrs = marker.subBullet
     ? `data-round="${marker.round}" data-subbullet="${marker.subBullet}" data-focus-target="subbullet"`
     : `data-round="${marker.round}" data-focus-target="round"`
   const left = ((Math.max(0, Math.min(13, marker.x)) - .5) / AIM_SIZE) * 100
   const top = ((Math.max(0, Math.min(13, marker.y)) - .5) / AIM_SIZE) * 100
-  const arrow = marker.result === 'CRITICAL MISS' ? `<span class="shot-marker-arrow">${marker.criticalMissArrow || getCriticalMissArrow(marker.x, marker.y)}</span>` : ''
-  return `<button type="button" class="shot-marker" data-shot="${marker.number}" ${focusAttrs} style="left:${left}%;top:${top}%;--marker-colour:${COLORS[marker.number % 10]}">${arrow}<span class="shot-marker-number">${marker.number}</span></button>`
+  return `<button type="button" class="shot-marker" data-shot="${marker.number}" ${focusAttrs} style="left:${left}%;top:${top}%;--marker-colour:${markerColour}"><span class="shot-marker-number">${marker.number}</span></button>`
 }
 
 function renderShotSummary(shot) {
@@ -138,7 +168,7 @@ function renderShotSummary(shot) {
     const detail = formatResultCounts(counts)
     const roll = shot.rolledX ? `d12 (${shot.rolledX}, ${shot.rolledY}) → ` : ''
     return `
-      <details class="shot-round" data-round="${shot.number}" data-focus-target="round">
+      <details class="shot-round" data-round="${shot.number}" data-focus-target="round" style="--marker-colour:${roundColor(shot.number)}">
         <summary class="shot-round-summary">
           <span class="shot-round-title">${roundLabel}</span>
           <span class="shot-round-meta">${roll}(${fmt(shot.x)}, ${fmt(shot.y)})${detail ? ` · ${detail}` : ''}</span>
@@ -147,15 +177,16 @@ function renderShotSummary(shot) {
           ${shot.subBullets.map(bullet => `
             <button
               type="button"
-              class="shot-subshot"
+              class="shot-subshot ${bullet.result === 'CRITICAL MISS' ? 'is-critical-miss' : ''}"
               data-round="${shot.number}"
               data-subbullet="${bullet.number}"
-              data-focus-target="subbullet"
+              data-focus-target="${bullet.result === 'CRITICAL MISS' ? 'critical-miss' : 'subbullet'}"
+              style="--marker-colour:${roundColor(shot.number)}"
             >
               <span class="shot-subshot-title">Pellet ${bullet.number}</span>
               <span class="shot-subshot-meta">
                 (${fmt(bullet.x)}, ${fmt(bullet.y)})
-                ${bullet.result === 'CRITICAL MISS' ? `<strong class="critical-miss">${bullet.criticalMissArrow || getCriticalMissArrow(bullet.x, bullet.y)}</strong>` : `<strong class="${cssResult(bullet.result)}">${bullet.result}</strong>`}
+                ${bullet.result === 'CRITICAL MISS' ? `<strong class="critical-miss"><span class="critical-miss-badge">${bullet.criticalMissArrow || getCriticalMissArrow(bullet.x, bullet.y)}</span> critical miss</strong>` : `<strong class="${cssResult(bullet.result)}">${bullet.result}</strong>`}
               </span>
             </button>
           `).join('')}
@@ -171,9 +202,10 @@ function renderShotSummary(shot) {
       class="shot-round shot-round--single"
     data-round="${shot.number}"
     data-focus-target="round"
+    style="--marker-colour:${roundColor(shot.number)}"
   >
       <span class="shot-round-title">${roundLabel}</span>
-      <span class="shot-round-meta">${roll}(${fmt(shot.x)}, ${fmt(shot.y)}) ${shot.result === 'CRITICAL MISS' ? `<strong class="critical-miss">${shot.criticalMissArrow || getCriticalMissArrow(shot.x, shot.y)}</strong>` : `<strong class="${cssResult(shot.result)}">${shot.result}</strong>`}</span>
+      <span class="shot-round-meta">${roll}(${fmt(shot.x)}, ${fmt(shot.y)}) ${shot.result === 'CRITICAL MISS' ? `<strong class="critical-miss"><span class="critical-miss-badge">${shot.criticalMissArrow || getCriticalMissArrow(shot.x, shot.y)}</span> critical miss</strong>` : `<strong class="${cssResult(shot.result)}">${shot.result}</strong>`}</span>
     </button>
   `
 }
@@ -347,6 +379,7 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   root.querySelector('#reload-sound').addEventListener('click', async event => { event.currentTarget.disabled = true; preloadSounds(); const selected = form.elements.fireSound.value; if (DEFAULT_SOUNDS[selected]) fireSound = new Audio(DEFAULT_SOUNDS[selected]); await unlockAudio(true); event.currentTarget.disabled = false })
   const audioOverlay = root.querySelector('#audio-unlock-overlay')
   const audioUnlockStatus = root.querySelector('#audio-unlock-status')
+  const setFocusFromElement = element => setFocus(describeShotTarget(element))
   const tryUnlockAudio = async () => {
     audioUnlockStatus.textContent = 'Enabling sound...'
     if (await unlockAudio()) {
@@ -366,8 +399,13 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   })
   table.addEventListener('pointerover', event => {
     const marker = event.target.closest('.shot-marker')
+    const critical = event.target.closest('.shot-critical-miss')
+    if (critical) {
+      setFocusFromElement(critical)
+      return
+    }
     if (!marker) return
-    setFocus(marker.dataset.subbullet ? { round: marker.dataset.round, subBullet: marker.dataset.subbullet } : { round: marker.dataset.round })
+    setFocusFromElement(marker)
   })
   table.addEventListener('pointerout', event => {
     if (event.relatedTarget && table.contains(event.relatedTarget)) return
@@ -375,8 +413,13 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   })
   table.addEventListener('focusin', event => {
     const marker = event.target.closest('.shot-marker')
+    const critical = event.target.closest('.shot-critical-miss')
+    if (critical) {
+      setFocusFromElement(critical)
+      return
+    }
     if (!marker) return
-    setFocus(marker.dataset.subbullet ? { round: marker.dataset.round, subBullet: marker.dataset.subbullet } : { round: marker.dataset.round })
+    setFocusFromElement(marker)
   })
   table.addEventListener('focusout', event => {
     if (event.relatedTarget && table.contains(event.relatedTarget)) return
@@ -385,7 +428,7 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   resultPanel.addEventListener('pointerover', event => {
     const item = event.target.closest('[data-focus-target]')
     if (!item) return
-    setFocus(item.dataset.subbullet ? { round: item.dataset.round, subBullet: item.dataset.subbullet } : { round: item.dataset.round })
+    setFocusFromElement(item)
   })
   resultPanel.addEventListener('pointerout', event => {
     if (event.relatedTarget && resultPanel.contains(event.relatedTarget)) return
@@ -394,7 +437,7 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   resultPanel.addEventListener('focusin', event => {
     const item = event.target.closest('[data-focus-target]')
     if (!item) return
-    setFocus(item.dataset.subbullet ? { round: item.dataset.round, subBullet: item.dataset.subbullet } : { round: item.dataset.round })
+    setFocusFromElement(item)
   })
   resultPanel.addEventListener('focusout', event => {
     if (event.relatedTarget && resultPanel.contains(event.relatedTarget)) return
