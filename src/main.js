@@ -8,6 +8,7 @@ const root = document.querySelector('#app')
 const setAudioStatus = async (unlocked) => {
   if (!isObrAvailable()) return
   await OBR.action.setBadgeText(unlocked ? '\u{1F50A}' : '\u{1F507}')
+  await OBR.action.setBadgeBackgroundColor('#00000000')
   await OBR.action.setTitle(`Aim & Recoil System — Audio ${unlocked ? 'enabled' : 'locked'}`)
 }
 

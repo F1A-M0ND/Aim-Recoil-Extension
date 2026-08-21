@@ -90,6 +90,24 @@ function groupMarkersByRound(markers = []) {
   }))
 }
 
+function getCriticalMissArrow(x, y) {
+  const horizontal = x < 0.5 ? 'left' : x > AIM_SIZE + 0.5 ? 'right' : ''
+  const vertical = y < 0.5 ? 'up' : y > AIM_SIZE + 0.5 ? 'down' : ''
+
+  if (horizontal && vertical) {
+    if (horizontal === 'left' && vertical === 'up') return '↖'
+    if (horizontal === 'right' && vertical === 'up') return '↗'
+    if (horizontal === 'left' && vertical === 'down') return '↙'
+    if (horizontal === 'right' && vertical === 'down') return '↘'
+  }
+
+  if (horizontal === 'left') return '←'
+  if (horizontal === 'right') return '→'
+  if (vertical === 'up') return '↑'
+  if (vertical === 'down') return '↓'
+  return ''
+}
+
 function describeShotTarget({ round, subBullet = null }) {
   return { round: Number(round), subBullet: subBullet == null ? null : Number(subBullet) }
 }
@@ -98,6 +116,8 @@ function targetMatchesElement(target, element) {
   const round = Number(element.dataset.round)
   if (round !== target.round) return false
   if (target.subBullet == null) return true
+  const focusTarget = element.dataset.focusTarget
+  if (focusTarget === 'round') return true
   return Number(element.dataset.subbullet) === target.subBullet
 }
 
@@ -105,7 +125,10 @@ function shotMarkerMarkup(marker) {
   const focusAttrs = marker.subBullet
     ? `data-round="${marker.round}" data-subbullet="${marker.subBullet}" data-focus-target="subbullet"`
     : `data-round="${marker.round}" data-focus-target="round"`
-  return `<button type="button" class="shot-marker" data-shot="${marker.number}" ${focusAttrs} style="left:${((Math.max(0, Math.min(13, marker.x)) - .5) / AIM_SIZE) * 100}%;top:${((Math.max(0, Math.min(13, marker.y)) - .5) / AIM_SIZE) * 100}%;--marker-colour:${COLORS[marker.number % 10]}">${marker.number}</button>`
+  const left = ((Math.max(0, Math.min(13, marker.x)) - .5) / AIM_SIZE) * 100
+  const top = ((Math.max(0, Math.min(13, marker.y)) - .5) / AIM_SIZE) * 100
+  const arrow = marker.result === 'CRITICAL MISS' ? `<span class="shot-marker-arrow">${marker.criticalMissArrow || getCriticalMissArrow(marker.x, marker.y)}</span>` : ''
+  return `<button type="button" class="shot-marker" data-shot="${marker.number}" ${focusAttrs} style="left:${left}%;top:${top}%;--marker-colour:${COLORS[marker.number % 10]}">${arrow}<span class="shot-marker-number">${marker.number}</span></button>`
 }
 
 function renderShotSummary(shot) {
@@ -130,7 +153,10 @@ function renderShotSummary(shot) {
               data-focus-target="subbullet"
             >
               <span class="shot-subshot-title">Pellet ${bullet.number}</span>
-              <span class="shot-subshot-meta">(${fmt(bullet.x)}, ${fmt(bullet.y)}) <strong class="${cssResult(bullet.result)}">${bullet.result}</strong></span>
+              <span class="shot-subshot-meta">
+                (${fmt(bullet.x)}, ${fmt(bullet.y)})
+                ${bullet.result === 'CRITICAL MISS' ? `<strong class="critical-miss">${bullet.criticalMissArrow || getCriticalMissArrow(bullet.x, bullet.y)}</strong>` : `<strong class="${cssResult(bullet.result)}">${bullet.result}</strong>`}
+              </span>
             </button>
           `).join('')}
         </div>
@@ -143,11 +169,11 @@ function renderShotSummary(shot) {
     <button
       type="button"
       class="shot-round shot-round--single"
-      data-round="${shot.number}"
-      data-focus-target="round"
-    >
+    data-round="${shot.number}"
+    data-focus-target="round"
+  >
       <span class="shot-round-title">${roundLabel}</span>
-      <span class="shot-round-meta">${roll}(${fmt(shot.x)}, ${fmt(shot.y)}) <strong class="${cssResult(shot.result)}">${shot.result}</strong></span>
+      <span class="shot-round-meta">${roll}(${fmt(shot.x)}, ${fmt(shot.y)}) ${shot.result === 'CRITICAL MISS' ? `<strong class="critical-miss">${shot.criticalMissArrow || getCriticalMissArrow(shot.x, shot.y)}</strong>` : `<strong class="${cssResult(shot.result)}">${shot.result}</strong>`}</span>
     </button>
   `
 }
@@ -176,7 +202,7 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
 
   root.innerHTML = `
     <div id="audio-unlock-overlay" role="button" tabindex="0" aria-label="Click to enable sound">
-      <div id="audio-unlock-button">Click to enable sound</div>
+      Click anywhere to enable sound
       <small id="audio-unlock-status">Required before fire sounds can play.</small>
     </div>
     <form class="app-shell" id="combat-form">
@@ -320,22 +346,17 @@ export async function createApp(root, { onAudioStatus = () => {} } = {}) {
   root.querySelector('#fire-sound-upload').addEventListener('change', event => { if (event.target.files[0]) fireSound = new Audio(URL.createObjectURL(event.target.files[0])) })
   root.querySelector('#reload-sound').addEventListener('click', async event => { event.currentTarget.disabled = true; preloadSounds(); const selected = form.elements.fireSound.value; if (DEFAULT_SOUNDS[selected]) fireSound = new Audio(DEFAULT_SOUNDS[selected]); await unlockAudio(true); event.currentTarget.disabled = false })
   const audioOverlay = root.querySelector('#audio-unlock-overlay')
-  const audioUnlockButton = root.querySelector('#audio-unlock-button')
   const audioUnlockStatus = root.querySelector('#audio-unlock-status')
   const tryUnlockAudio = async () => {
-    audioUnlockButton.disabled = true
     audioUnlockStatus.textContent = 'Enabling sound...'
     if (await unlockAudio()) {
       audioOverlay.remove()
       return
     }
     audioUnlockStatus.textContent = 'Sound could not start. Click again.'
-    audioUnlockButton.disabled = false
   }
   audioOverlay.addEventListener('click', event => {
-    if (event.target.closest('#audio-unlock-button') || event.target === audioOverlay) {
-      tryUnlockAudio()
-    }
+    if (event.target.closest('#audio-unlock-overlay')) tryUnlockAudio()
   })
   audioOverlay.addEventListener('keydown', event => {
     if (event.key === 'Enter' || event.key === ' ') {

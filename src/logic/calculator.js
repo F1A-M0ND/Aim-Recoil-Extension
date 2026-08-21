@@ -11,6 +11,24 @@ export function getAimResult(x, y) {
   return 'MISS'
 }
 
+export function getCriticalMissArrow(x, y) {
+  const horizontal = x < 0.5 ? 'left' : x > AIM_SIZE + 0.5 ? 'right' : ''
+  const vertical = y < 0.5 ? 'up' : y > AIM_SIZE + 0.5 ? 'down' : ''
+
+  if (horizontal && vertical) {
+    if (horizontal === 'left' && vertical === 'up') return '↖'
+    if (horizontal === 'right' && vertical === 'up') return '↗'
+    if (horizontal === 'left' && vertical === 'down') return '↙'
+    if (horizontal === 'right' && vertical === 'down') return '↘'
+  }
+
+  if (horizontal === 'left') return '←'
+  if (horizontal === 'right') return '→'
+  if (vertical === 'up') return '↑'
+  if (vertical === 'down') return '↓'
+  return ''
+}
+
 function applyDebuff(value, amount, random = Math.random) {
   // A debuff always moves a die away from the true centre of the table.
   if (value === 6.5) return random() < 0.5 ? value - amount : value + amount
@@ -178,9 +196,15 @@ export function fireSeries(input, random = Math.random) {
     for (let subBullet = 0; subBullet < subBulletCount; subBullet += 1) {
       const angle = random() * Math.PI * 2
       const distance = Math.sqrt(random()) * radius
-      const x = Math.min(AIM_SIZE, Math.max(1, shot.x + Math.cos(angle) * distance))
-      const y = Math.min(AIM_SIZE, Math.max(1, shot.y + Math.sin(angle) * distance))
-      subBullets.push({ number: subBullet + 1, x, y, result: getAimResult(x, y) })
+      const x = shot.x + Math.cos(angle) * distance
+      const y = shot.y + Math.sin(angle) * distance
+      subBullets.push({
+        number: subBullet + 1,
+        x,
+        y,
+        result: getAimResult(x, y),
+        criticalMissArrow: getCriticalMissArrow(x, y)
+      })
     }
 
     shots.push({ number: index + 1, round: index + 1, ...shot, subBullets })
