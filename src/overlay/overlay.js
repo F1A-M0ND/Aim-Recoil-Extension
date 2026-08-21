@@ -87,8 +87,8 @@ function tableMarkup(shots=[]){
             <button
             class="shot-critical-miss is-${direction}"
             style="
-            left:${clampedLeft}%;
-            top:${clampedTop}%;
+            left:clamp(9px, ${clampedLeft}%, calc(100% - 9px));
+            top:clamp(9px, ${clampedTop}%, calc(100% - 9px));
             --marker-colour:${getRoundColor(round ?? number)};
             "
             >

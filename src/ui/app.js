@@ -151,7 +151,7 @@ function shotMarkerMarkup(marker) {
     const left = marker.x < 0.5 ? 0 : marker.x > AIM_SIZE + 0.5 ? 100 : ((Math.max(0.5, Math.min(AIM_SIZE + 0.5, marker.x)) - 0.5) / AIM_SIZE) * 100
     const top = marker.y < 0.5 ? 0 : marker.y > AIM_SIZE + 0.5 ? 100 : ((Math.max(0.5, Math.min(AIM_SIZE + 0.5, marker.y)) - 0.5) / AIM_SIZE) * 100
     const subBulletAttr = marker.subBullet ? `data-subbullet="${marker.subBullet}"` : ''
-    return `<button type="button" class="shot-critical-miss is-${direction}" data-shot="${marker.number}" data-round="${marker.round}" ${subBulletAttr} data-focus-target="critical-miss" style="left:${left}%;top:${top}%;--marker-colour:${markerColour}"><span class="shot-critical-miss-dot"></span><span class="shot-critical-miss-triangle"></span></button>`
+    return `<button type="button" class="shot-critical-miss is-${direction}" data-shot="${marker.number}" data-round="${marker.round}" ${subBulletAttr} data-focus-target="critical-miss" style="left:clamp(9px, ${left}%, calc(100% - 9px));top:clamp(9px, ${top}%, calc(100% - 9px));--marker-colour:${markerColour}"><span class="shot-critical-miss-dot"></span><span class="shot-critical-miss-triangle"></span></button>`
   }
   const focusAttrs = marker.subBullet
     ? `data-round="${marker.round}" data-subbullet="${marker.subBullet}" data-focus-target="subbullet"`
